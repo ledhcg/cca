@@ -1,0 +1,7 @@
+version: "2"
+
+# golangci-lint config. Keeps the community default linter set — no extra
+# strict linters (gocyclo, funlen, ...) so this doesn't force cleanup outside
+# the scope of whatever change triggered it.
+linters:
+  default: standard
