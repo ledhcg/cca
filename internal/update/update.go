@@ -310,10 +310,10 @@ func Apply(a *app.App, release *ReleaseInfo) error {
 		return err
 	}
 
-	// If the current executable is outside ~/.claude/bin, but ~/.claude/bin/cca exists, update it too
+	// If the current executable is outside ~/.claude/bin, but ~/.claude/bin/cca exists, copy update to it too
 	if destPath != canonPath {
 		if _, err := os.Stat(canonPath); err == nil {
-			_ = replaceExecutable(destPath, canonPath)
+			_ = copyFile(destPath, canonPath)
 		}
 	}
 
@@ -326,6 +326,22 @@ func canonicalPath(a *app.App) string {
 		name = "cca.exe"
 	}
 	return filepath.Join(a.Main, "bin", name)
+}
+
+func copyFile(src, dst string) error {
+	_ = os.MkdirAll(filepath.Dir(dst), 0755)
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	if runtime.GOOS == "windows" {
+		if _, err := os.Stat(dst); err == nil {
+			old := dst + ".old"
+			_ = os.Remove(old)
+			_ = os.Rename(dst, old)
+		}
+	}
+	return os.WriteFile(dst, data, 0755)
 }
 
 func replaceExecutable(src, dst string) error {
