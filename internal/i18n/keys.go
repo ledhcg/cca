@@ -91,6 +91,17 @@ const (
 	KeyCmdSettingsLangAutoSet    Key = "cmd.settings.lang_auto_set"
 	KeyCmdSettingsLangErrInvalid Key = "cmd.settings.lang_err_invalid"
 
+	// Commands - update
+	KeyCmdUpdateChecking        Key = "cmd.update.checking"
+	KeyCmdUpdateAlreadyLatest   Key = "cmd.update.already_latest"
+	KeyCmdUpdateAvailableNotice Key = "cmd.update.available_notice"
+	KeyCmdUpdateRunHint         Key = "cmd.update.run_hint"
+	KeyCmdUpdateDownloading     Key = "cmd.update.downloading"
+	KeyCmdUpdateSuccess         Key = "cmd.update.success"
+	KeyCmdUpdateCheckFailed     Key = "cmd.update.check_failed"
+	KeyCmdUpdateApplyFailed     Key = "cmd.update.apply_failed"
+	KeyCmdUpdateNoAsset         Key = "cmd.update.no_asset"
+
 	// Guide & Usage
 	KeyGuideUsage Key = "guide.usage"
 	KeyGuideFull  Key = "guide.full"

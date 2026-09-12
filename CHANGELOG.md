@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented in this file.
 
+## [1.1.0] — 2026-09-13
+
+### Added
+- **Multi-language support (i18n)**: 5 popular languages out of the box —
+  English (`en`, default), Vietnamese (`vi`), Simplified Chinese (`zh`),
+  Japanese (`ja`), and Spanish (`es`), plus system auto-detection (`auto`).
+  All command outputs, guides, table headers, and error messages are fully
+  localized with zero external dependencies.
+- **Dedicated `cca settings` command**: Interactive dashboard and language
+  picker for configuring user preferences and display language (`cca settings lang`).
+  Cleanly separated from `cca config` (which opens `~/.claude-accounts` in VS Code).
+- **In-place self-update (`cca update`)**: Download and replace the current binary
+  directly from GitHub Releases (`ledhcg/cca`) across macOS, Linux, and Windows
+  with safe in-place replacement mechanics (using the `.old` executable rename pattern on Windows).
+  Supports `cca update --check` (or `-c`) to inspect for updates without downloading.
+- **Non-blocking background update checks**: Periodically checks for new releases
+  every 24 hours in a background goroutine without slowing down CLI execution.
+  Notifies users via a subtle, non-intrusive alert on `stderr` when an update is available.
+- **Enhanced `cca version`**: Displays current version and highlights available updates
+  from the local cache.
+- **Rune- and CJK-aware terminal formatting**: `ui.StringWidth` and `ui.PadRight`
+  ensure visual alignment across Vietnamese accented text and full-width CJK (Chinese, Japanese)
+  characters in tables and menus.
+
 ## [1.0.0] — 2026-09-08
 
 Initial public release.

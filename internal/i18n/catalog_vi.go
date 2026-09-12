@@ -88,6 +88,17 @@ var viCatalog = map[Key]string{
 	KeyCmdSettingsLangAutoSet:    "Đã đặt lại ngôn ngữ tự động (hệ thống hiện tại: %s)",
 	KeyCmdSettingsLangErrInvalid: "Ngôn ngữ '%s' không được hỗ trợ. Các ngôn ngữ hỗ trợ: %s, hoặc 'auto'",
 
+	// Commands - update
+	KeyCmdUpdateChecking:        "Đang kiểm tra bản cập nhật…",
+	KeyCmdUpdateAlreadyLatest:   "cca đã ở phiên bản mới nhất (%s)",
+	KeyCmdUpdateAvailableNotice: "Đã có phiên bản mới của cca: %s → %s",
+	KeyCmdUpdateRunHint:         "Chạy 'cca update' để nâng cấp.",
+	KeyCmdUpdateDownloading:     "Đang tải xuống cca %s…",
+	KeyCmdUpdateSuccess:         "Cập nhật cca lên %s thành công",
+	KeyCmdUpdateCheckFailed:     "không thể kiểm tra bản cập nhật: %v",
+	KeyCmdUpdateApplyFailed:     "không thể áp dụng bản cập nhật: %v",
+	KeyCmdUpdateNoAsset:         "không có bản dựng sẵn cho %s/%s trong bản phát hành %s",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — quản lý nhiều tài khoản Claude Code trên một máy
 
@@ -106,6 +117,7 @@ Các lệnh:
   sync [<tên>|--all]     làm mới các tệp dùng chung (--strategy)
   doctor                 kiểm tra liên kết, credentials, hồ sơ mồ côi
   settings [lang]        quản lý cài đặt & ngôn ngữ hiển thị
+  update [--check]       kiểm tra cập nhật và tự động nâng cấp
   config                 mở thư mục ~/.claude-accounts trong VS Code (--edit, --print)
   guide                  xem cẩm nang hướng dẫn đầy đủ
   install                thêm cca vào PATH + cài đặt completion

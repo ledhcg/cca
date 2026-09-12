@@ -88,6 +88,17 @@ var enCatalog = map[Key]string{
 	KeyCmdSettingsLangAutoSet:    "Language reset to auto (current system: %s)",
 	KeyCmdSettingsLangErrInvalid: "Unsupported language '%s'. Supported: %s, or 'auto'",
 
+	// Commands - update
+	KeyCmdUpdateChecking:        "Checking for updates…",
+	KeyCmdUpdateAlreadyLatest:   "cca is already up to date (%s)",
+	KeyCmdUpdateAvailableNotice: "A new version of cca is available: %s → %s",
+	KeyCmdUpdateRunHint:         "Run 'cca update' to upgrade.",
+	KeyCmdUpdateDownloading:     "Downloading cca %s…",
+	KeyCmdUpdateSuccess:         "Successfully updated cca to %s",
+	KeyCmdUpdateCheckFailed:     "failed to check for updates: %v",
+	KeyCmdUpdateApplyFailed:     "failed to apply update: %v",
+	KeyCmdUpdateNoAsset:         "no prebuilt binary available for %s/%s in release %s",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — multiple Claude Code accounts on one machine
 
@@ -106,6 +117,7 @@ Commands:
   sync [<name>|--all]           refresh shared files (--strategy)
   doctor                         check links, credentials, orphaned profiles
   settings [lang]                 manage settings & display language
+  update [--check]                check for updates and self-update
   config                          open ~/.claude-accounts in VS Code (--edit, --print)
   guide                            full usage guide
   install                          add cca to PATH + completion

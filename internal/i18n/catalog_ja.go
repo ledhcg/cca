@@ -88,6 +88,17 @@ var jaCatalog = map[Key]string{
 	KeyCmdSettingsLangAutoSet:    "言語設定を自動にリセットしました (現在のシステム: %s)",
 	KeyCmdSettingsLangErrInvalid: "サポートされていない言語 '%s' です。対応言語: %s、または 'auto'",
 
+	// Commands - update
+	KeyCmdUpdateChecking:        "アップデートを確認中…",
+	KeyCmdUpdateAlreadyLatest:   "cca は既に最新バージョンです (%s)",
+	KeyCmdUpdateAvailableNotice: "cca の新しいバージョンが利用可能です: %s → %s",
+	KeyCmdUpdateRunHint:         "'cca update' を実行して更新してください。",
+	KeyCmdUpdateDownloading:     "cca %s をダウンロード中…",
+	KeyCmdUpdateSuccess:         "cca を %s に正常に更新しました",
+	KeyCmdUpdateCheckFailed:     "アップデートの確認に失敗しました: %v",
+	KeyCmdUpdateApplyFailed:     "アップデートの適用に失敗しました: %v",
+	KeyCmdUpdateNoAsset:         "リリース %[3]s に %[1]s/%[2]s 用のビルド済みバイナリがありません",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — 1台のマシンで複数の Claude Code アカウントを管理
 
@@ -106,6 +117,7 @@ var jaCatalog = map[Key]string{
   sync [<名前>|--all]    共有ファイルを更新 (--strategy)
   doctor                 リンク、認証情報、孤立プロファイルを検査
   settings [lang]        設定と表示言語を管理
+  update [--check]       アップデートの確認と自動更新
   config                 ~/.claude-accounts を VS Code で開く (--edit, --print)
   guide                  完全ガイドを表示
   install                cca を PATH に追加し補完を設定

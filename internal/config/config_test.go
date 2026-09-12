@@ -71,3 +71,29 @@ func TestConfigLangOmitEmpty(t *testing.T) {
 		t.Errorf("expected json not to contain lang field when empty, got %s", string(dataEmpty))
 	}
 }
+
+func TestConfigUpdateCacheOmitEmpty(t *testing.T) {
+	cfg := Default
+	cfg.LastUpdateCheck = 1726000000
+	cfg.LatestVersion = "v1.1.0"
+
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(data)
+	if !strings.Contains(s, `"lastUpdateCheck"`) || !strings.Contains(s, `"latestVersion"`) {
+		t.Errorf("expected json to contain update fields, got %s", s)
+	}
+
+	cfg.LastUpdateCheck = 0
+	cfg.LatestVersion = ""
+	dataEmpty, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	sEmpty := string(dataEmpty)
+	if strings.Contains(sEmpty, `"lastUpdateCheck"`) || strings.Contains(sEmpty, `"latestVersion"`) {
+		t.Errorf("expected json to omit empty update fields, got %s", sEmpty)
+	}
+}

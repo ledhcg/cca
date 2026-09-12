@@ -1,6 +1,9 @@
 package cli
 
 import (
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -8,6 +11,7 @@ import (
 	"github.com/ledhcg/cca/internal/app"
 	"github.com/ledhcg/cca/internal/config"
 	"github.com/ledhcg/cca/internal/i18n"
+	"github.com/ledhcg/cca/internal/update"
 )
 
 func TestExpandYolo(t *testing.T) {
@@ -111,5 +115,31 @@ func TestCmdSettingsSetLanguage(t *testing.T) {
 	err = cmdSettings(a, parsedArgs{positional: []string{"lang", "invalid-lang"}})
 	if err == nil {
 		t.Errorf("expected error for invalid language, got nil")
+	}
+}
+
+func TestCmdVersion(t *testing.T) {
+	a := testApp(t)
+	if err := cmdVersion(a); err != nil {
+		t.Fatalf("cmdVersion failed: %v", err)
+	}
+}
+
+func TestCmdUpdateCheckWithMock(t *testing.T) {
+	a := testApp(t)
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"tag_name":"v1.0.0","assets":[]}`)
+	}))
+	defer ts.Close()
+
+	oldBase := update.GitHubAPIBaseURL
+	update.GitHubAPIBaseURL = ts.URL
+	defer func() { update.GitHubAPIBaseURL = oldBase }()
+
+	err := cmdUpdate(a, parsedArgs{bools: map[string]bool{"--check": true}})
+	if err != nil {
+		t.Fatalf("cmdUpdate --check failed: %v", err)
 	}
 }

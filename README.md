@@ -23,6 +23,10 @@ work       logged in   you@company.com      team
   sessions, credentials, and history never collide.
 - **Shared plugins/skills/agents** — install a plugin once, every profile
   sees it, via real symlinks with an automatic Windows fallback.
+- **Multi-language support (i18n)** — out of the box in 5 languages (English,
+  Vietnamese, Simplified Chinese, Japanese, Spanish) with `cca settings lang`.
+- **In-place self-update** — check and update to the latest release seamlessly
+  with `cca update` (plus 24h background checks).
 - **No runtime required** — a single static Go binary; no Python, Node, or
   package manager needed to run `cca` itself.
 - **Native credential storage per OS** — macOS Keychain, plain file on
@@ -228,10 +232,12 @@ internal/app                runtime paths (Home/Main/Root/ConfigPath), no global
 internal/cli                 dispatch, argument parser, every cmd* command
 internal/config                shared config.json, seed()/sync
 internal/credential              Keychain (macOS) / file (Linux, Windows) interface
+internal/i18n                     multi-language catalogs (en, vi, zh, ja, es) and translation
 internal/link                     symlink with junction/hard link/copy fallback
 internal/profileenv                profile directories, environment variables
 internal/shellrc                    shell detection + PATH/completion snippet
-internal/ui                          colors, terminal output, Windows console setup
+internal/ui                          colors, terminal output, Windows console setup, CJK width
+internal/update                    version checking, GitHub releases API, in-place self-update
 ```
 
 Every package other than `internal/cli` takes an explicit `*app.App` instead

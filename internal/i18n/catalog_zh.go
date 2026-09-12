@@ -88,6 +88,17 @@ var zhCatalog = map[Key]string{
 	KeyCmdSettingsLangAutoSet:    "语言已重置为自动 (当前系统: %s)",
 	KeyCmdSettingsLangErrInvalid: "不支持的语言 '%s'。支持的语言: %s，或 'auto'",
 
+	// Commands - update
+	KeyCmdUpdateChecking:        "正在检查更新…",
+	KeyCmdUpdateAlreadyLatest:   "cca 已是最新版本 (%s)",
+	KeyCmdUpdateAvailableNotice: "发现 cca 新版本: %s → %s",
+	KeyCmdUpdateRunHint:         "运行 'cca update' 进行更新。",
+	KeyCmdUpdateDownloading:     "正在下载 cca %s…",
+	KeyCmdUpdateSuccess:         "已成功将 cca 更新至 %s",
+	KeyCmdUpdateCheckFailed:     "检查更新失败: %v",
+	KeyCmdUpdateApplyFailed:     "应用更新失败: %v",
+	KeyCmdUpdateNoAsset:         "发布版本 %[3]s 中没有适用于 %[1]s/%[2]s 的预编译二进制文件",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — 在同一台机器上管理多个 Claude Code 账号
 
@@ -106,6 +117,7 @@ var zhCatalog = map[Key]string{
   sync [<名称>|--all]    刷新共享文件 (--strategy)
   doctor                 检查软链接、凭证和孤立配置文件
   settings [lang]        管理设置与显示语言
+  update [--check]       检查并自动更新 cca
   config                 在 VS Code 中打开 ~/.claude-accounts (--edit, --print)
   guide                  查看完整使用指南
   install                将 cca 添加到 PATH 并配置自动补全

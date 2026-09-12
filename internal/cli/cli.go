@@ -17,6 +17,7 @@ import (
 	"github.com/ledhcg/cca/internal/i18n"
 	"github.com/ledhcg/cca/internal/profileenv"
 	"github.com/ledhcg/cca/internal/ui"
+	"github.com/ledhcg/cca/internal/update"
 )
 
 // Version is overridden at build time via
@@ -106,7 +107,7 @@ func extractLang(argv []string) ([]string, string) {
 var subcommands = map[string]bool{
 	"ls": true, "new": true, "use": true, "login": true, "logout": true,
 	"info": true, "sh": true, "exec": true, "rm": true, "sync": true,
-	"doctor": true, "settings": true, "config": true, "guide": true, "help": true, "install": true,
+	"doctor": true, "settings": true, "update": true, "config": true, "guide": true, "help": true, "install": true,
 	"version": true,
 }
 
@@ -114,6 +115,44 @@ var subcommands = map[string]bool{
 // returns the process exit code — the only caller, cmd/cca/main.go, does
 // nothing but pass it to os.Exit.
 func Run(a *app.App, argv []string) int {
+	update.TriggerBackgroundCheck(a, Version)
+
+	code := dispatch(a, argv)
+	cmd := "ls"
+	if len(argv) > 0 {
+		cmd = argv[0]
+	}
+	if code == 0 {
+		notifyUpdate(a, cmd)
+	}
+	return code
+}
+
+func notifyUpdate(a *app.App, cmd string) {
+	if cmd == "update" || cmd == "version" || Version == "dev" {
+		return
+	}
+	if os.Getenv("CCA_NO_UPDATE_CHECK") != "" || os.Getenv("CI") != "" {
+		return
+	}
+	if !ui.IsTerminal(os.Stderr) {
+		return
+	}
+	cfg, err := config.Load(a)
+	if err != nil || cfg.LatestVersion == "" {
+		return
+	}
+	if update.CompareVersions(Version, cfg.LatestVersion) < 0 {
+		fmt.Fprintf(os.Stderr, "\n%s! %s%s\n  %s\n\n",
+			ui.C.Yellow,
+			i18n.T(i18n.KeyCmdUpdateAvailableNotice, Version, cfg.LatestVersion),
+			ui.C.Off,
+			i18n.T(i18n.KeyCmdUpdateRunHint),
+		)
+	}
+}
+
+func dispatch(a *app.App, argv []string) int {
 	ui.Init()
 	ui.SetupConsole()
 
@@ -186,6 +225,8 @@ func Run(a *app.App, argv []string) int {
 		return runCmd(func() error { return cmdDoctor(a, parseArgs(rest, nil, nil)) })
 	case "settings":
 		return runCmd(func() error { return cmdSettings(a, parseArgs(rest, nil, nil)) })
+	case "update":
+		return runCmd(func() error { return cmdUpdate(a, parseArgs(rest, []string{"--check", "-c"}, nil)) })
 	case "config":
 		return runCmd(func() error { return cmdConfig(a, parseArgs(rest, []string{"--edit", "--print"}, nil)) })
 	case "guide":
@@ -195,8 +236,7 @@ func Run(a *app.App, argv []string) int {
 		printUsage()
 		return 0
 	case "version", "--version", "-v":
-		fmt.Println("cca " + Version)
-		return 0
+		return runCmd(func() error { return cmdVersion(a) })
 	case "install":
 		return runCmd(func() error { return cmdInstall(a, parseArgs(rest, nil, []string{"--rc", "--rc-kind"})) })
 	default:

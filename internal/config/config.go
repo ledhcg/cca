@@ -11,10 +11,13 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"sync"
 
 	"github.com/ledhcg/cca/internal/app"
 	"github.com/ledhcg/cca/internal/link"
 )
+
+var configMu sync.RWMutex
 
 // Config is the shared configuration linked into every profile. See `cca sync --help`.
 type Config struct {
@@ -28,6 +31,10 @@ type Config struct {
 	ProfileLocalKeys []string `json:"profileLocalKeys"`
 	// Lang specifies the preferred UI language ("en", "vi", "zh", "ja", "es" or "" for auto).
 	Lang string `json:"lang,omitempty"`
+	// LastUpdateCheck records the Unix timestamp (seconds) of the last background update check.
+	LastUpdateCheck int64 `json:"lastUpdateCheck,omitempty"`
+	// LatestVersion caches the latest release version discovered (e.g. "v1.1.0").
+	LatestVersion string `json:"latestVersion,omitempty"`
 }
 
 // Default is used until a config.json exists on disk.
@@ -40,6 +47,9 @@ var Default = Config{
 
 // Load reads a.ConfigPath, falling back to Default if it doesn't exist yet.
 func Load(a *app.App) (Config, error) {
+	configMu.RLock()
+	defer configMu.RUnlock()
+
 	cfg := Default
 	data, err := os.ReadFile(a.ConfigPath)
 	if err != nil {
@@ -53,6 +63,9 @@ func Load(a *app.App) (Config, error) {
 
 // Save writes cfg to a.ConfigPath, creating a.Root if needed.
 func Save(a *app.App, cfg Config) error {
+	configMu.Lock()
+	defer configMu.Unlock()
+
 	if err := os.MkdirAll(a.Root, 0755); err != nil {
 		return err
 	}
@@ -60,7 +73,11 @@ func Save(a *app.App, cfg Config) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(a.ConfigPath, append(data, '\n'), 0644)
+	tmp := a.ConfigPath + ".tmp"
+	if err := os.WriteFile(tmp, append(data, '\n'), 0644); err != nil {
+		return err
+	}
+	return os.Rename(tmp, a.ConfigPath)
 }
 
 // Merge merges ~/.claude's settings.json into a profile's copy.

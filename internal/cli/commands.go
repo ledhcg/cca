@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/ledhcg/cca/internal/app"
 	"github.com/ledhcg/cca/internal/config"
@@ -19,6 +20,7 @@ import (
 	"github.com/ledhcg/cca/internal/profileenv"
 	"github.com/ledhcg/cca/internal/shellrc"
 	"github.com/ledhcg/cca/internal/ui"
+	"github.com/ledhcg/cca/internal/update"
 )
 
 // ── printing helpers ─────────────────────────────────────────────────────────
@@ -665,6 +667,64 @@ func cmdConfig(a *app.App, args parsedArgs) error {
 	}
 	_ = exec.Command(codeBin, a.Root).Run()
 	ui.Ok("Opened %s in VS Code", a.Root)
+	return nil
+}
+
+func cmdVersion(a *app.App) error {
+	fmt.Println("cca " + Version)
+	cfg, err := config.Load(a)
+	if err == nil && cfg.LatestVersion != "" && update.CompareVersions(Version, cfg.LatestVersion) < 0 {
+		fmt.Printf("\n%s! %s%s\n  %s\n",
+			ui.C.Yellow,
+			i18n.T(i18n.KeyCmdUpdateAvailableNotice, Version, cfg.LatestVersion),
+			ui.C.Off,
+			i18n.T(i18n.KeyCmdUpdateRunHint),
+		)
+	}
+	return nil
+}
+
+func cmdUpdate(a *app.App, args parsedArgs) error {
+	fmt.Println(ui.C.Dim + i18n.T(i18n.KeyCmdUpdateChecking) + ui.C.Off)
+
+	rel, hasUpdate, err := update.CheckLatest(Version)
+	if err != nil {
+		return fmt.Errorf("%s: %w", i18n.T(i18n.KeyCmdUpdateCheckFailed), err)
+	}
+
+	cfg, _ := config.Load(a)
+	cfg.LastUpdateCheck = time.Now().Unix()
+	if hasUpdate {
+		cfg.LatestVersion = rel.Version
+	} else {
+		cfg.LatestVersion = ""
+	}
+	_ = config.Save(a, cfg)
+
+	if !hasUpdate {
+		ui.Ok(i18n.T(i18n.KeyCmdUpdateAlreadyLatest, Version))
+		return nil
+	}
+
+	if args.bools["--check"] || args.bools["-c"] {
+		ui.Warn(i18n.T(i18n.KeyCmdUpdateAvailableNotice, Version, rel.Version))
+		fmt.Printf("  %s\n", i18n.T(i18n.KeyCmdUpdateRunHint))
+		if rel.HTMLURL != "" {
+			fmt.Printf("  %s%s%s\n", ui.C.Dim, rel.HTMLURL, ui.C.Off)
+		}
+		return nil
+	}
+
+	if Version == "dev" {
+		ui.Warn("Running a development build. Proceeding to update to latest release: %s", rel.Version)
+	}
+
+	fmt.Println(i18n.T(i18n.KeyCmdUpdateDownloading, rel.Version))
+	if err := update.Apply(a, rel); err != nil {
+		return fmt.Errorf("%s: %w", i18n.T(i18n.KeyCmdUpdateApplyFailed), err)
+	}
+
+	ui.Ok(i18n.T(i18n.KeyCmdUpdateSuccess, rel.Version))
 	return nil
 }
 
