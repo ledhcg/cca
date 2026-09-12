@@ -78,12 +78,13 @@ func cmdSessionLs(a *app.App, argv []string) error {
 	}
 
 	if len(sessions) == 0 {
+		msg := i18n.T(i18n.KeyCmdSessionNoSessionsFound, fromProfile)
 		if allProjects {
-			fmt.Println(ui.C.Dim + fmt.Sprintf(i18n.T(i18n.KeyCmdSessionNoSessionsFound, fromProfile)) + ui.C.Off)
+			fmt.Println(ui.C.Dim + msg + ui.C.Off)
 		} else {
 			fmt.Printf("%s%s %s%s\n",
 				ui.C.Dim,
-				fmt.Sprintf(i18n.T(i18n.KeyCmdSessionNoSessionsFound, fromProfile)),
+				msg,
 				i18n.T(i18n.KeyCmdSessionNoSessionsAllHint),
 				ui.C.Off,
 			)
