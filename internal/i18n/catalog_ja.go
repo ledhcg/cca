@@ -99,6 +99,35 @@ var jaCatalog = map[Key]string{
 	KeyCmdUpdateApplyFailed:     "アップデートの適用に失敗しました: %v",
 	KeyCmdUpdateNoAsset:         "リリース %[3]s に %[1]s/%[2]s 用のビルド済みバイナリがありません",
 
+	// Commands - handoff
+	KeyCmdHandoffMissingTarget:  "引き継ぎ先のプロファイル名が指定されていません — 例: cca handoff work",
+	KeyCmdHandoffSameProfile:    "引き継ぎ元と引き継ぎ先に同一のプロファイルは指定できません",
+	KeyCmdHandoffNoSessionFound: "プロファイル '%s' にこのプロジェクトのセッションが見つかりません",
+	KeyCmdHandoffBanner:         "セッション %s (%s) を '%s' から '%s' へ引き継いでいます…",
+	KeyCmdHandoffCopyFailed:     "セッションの引き継ぎに失敗しました: %w",
+
+	// Commands - session
+	KeyCmdSessionUnknownSubcmd:     "不明なセッションコマンド '%s' — 利用可能: ls, cp, mv, rm",
+	KeyCmdSessionMissingFromTo:     "--from と --to の両方が必要です — 例: cca session cp --from work --to personal --all",
+	KeyCmdSessionSameProfile:       "--from と --to に同一のプロファイルは指定できません",
+	KeyCmdSessionRequireIdOrAll:    "--id <sessionId> または --all のいずれかを指定する必要があります",
+	KeyCmdSessionNoSessionsFound:   "プロファイル '%s' にこのプロジェクトのセッションが見つかりません",
+	KeyCmdSessionNoSessionsAllHint: "(--all を使用すると全プロジェクトのセッションを表示します)",
+	KeyCmdSessionCopySuccess:       "セッション %s を '%s' から '%s' にコピーしました",
+	KeyCmdSessionCopyAllSuccess:    "%d 件のセッションを '%s' から '%s' にコピーしました",
+	KeyCmdSessionMoveSuccess:       "セッション %s を '%s' から '%s' に移動しました",
+	KeyCmdSessionMoveAllSuccess:    "%d 件のセッションを '%s' から '%s' に移動しました",
+	KeyCmdSessionRmSuccess:         "セッション %s を '%s' から削除しました",
+	KeyCmdSessionRmAllSuccess:      "%d 件のセッションを '%s' から削除しました",
+	KeyCmdSessionRmConfirmSingle:   "プロファイル '%s' からセッション %s を削除しようとしています。よろしいですか? [y/N] ",
+	KeyCmdSessionRmConfirmAll:      "プロファイル '%s' からこのプロジェクトの %d 件のセッションを削除しようとしています。よろしいですか? [y/N] ",
+	KeyCmdSessionHeaderID:          "セッションID",
+	KeyCmdSessionHeaderProject:     "プロジェクト",
+	KeyCmdSessionHeaderTitle:       "タイトル",
+	KeyCmdSessionHeaderMessages:    "メッセージ数",
+	KeyCmdSessionHeaderSize:        "サイズ",
+	KeyCmdSessionHeaderModified:    "更新日時",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — 1台のマシンで複数の Claude Code アカウントを管理
 
@@ -108,6 +137,8 @@ var jaCatalog = map[Key]string{
   ls                    プロファイルとログイン中のアカウント一覧
   new <名前>             新規プロファイルを作成 (--login, --yolo)
   use <名前> [引数…]     指定プロファイルで Claude Code を起動
+  handoff <先> [引数…]   現在のセッションを別プロファイルへ引き継ぐ (--fork)
+  session <操作>         セッション管理: ls, cp, mv, rm (--from, --to, --all, --id)
   login <名前>           プロファイルにログイン
   logout <名前>          プロファイルからログアウト
   info <名前>            プロファイル詳細を表示
@@ -122,6 +153,19 @@ var jaCatalog = map[Key]string{
   guide                  完全ガイドを表示
   install                cca を PATH に追加し補完を設定
   version                cca のバージョンを表示
+
+使用例:
+  cca new work --login       'work' プロファイルを作成してすぐログイン
+  cca work                   'work' プロファイルで Claude Code を実行
+  cca work --resume          追加の引数はそのまま claude に渡されます
+  cca handoff work           セッションを 'work' へ引き継いで作業を続行
+  cca session ls             カレントディレクトリのセッション一覧
+  cca session cp --from default --to work --all   全セッションをコピー
+  cca ls                     アカウントのログイン状況を確認
+  cca sync --all             プラグイン追加後に共有ファイルを再同期
+  cca settings lang          表示言語を変更
+  cca work --yolo            --dangerously-skip-permissions の別名
+  cca sh work                CLAUDE_CONFIG_DIR 設定済みのサブシェルを開く
 
 使用例:
   cca new work --login       'work' プロファイルを作成してすぐログイン

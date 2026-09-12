@@ -25,6 +25,9 @@ work       logged in   you@company.com      team
   sees it, via real symlinks with an automatic Windows fallback.
 - **Multi-language support (i18n)** — out of the box in 5 languages (English,
   Vietnamese, Simplified Chinese, Japanese, Spanish) with `cca settings lang`.
+- **Session transfer & handoff** — seamlessly hand off an active session from
+  one account to another with `cca handoff <target>` (e.g. when quota runs out),
+  or manage sessions with `cca session ls/cp/mv/rm`.
 - **In-place self-update** — check and update to the latest release seamlessly
   with `cca update` (plus 24h background checks).
 - **No runtime required** — a single static Go binary; no Python, Node, or
@@ -235,6 +238,7 @@ internal/credential              Keychain (macOS) / file (Linux, Windows) interf
 internal/i18n                     multi-language catalogs (en, vi, zh, ja, es) and translation
 internal/link                     symlink with junction/hard link/copy fallback
 internal/profileenv                profile directories, environment variables
+internal/session                   session discovery, metadata parsing, transfer/handoff
 internal/shellrc                    shell detection + PATH/completion snippet
 internal/ui                          colors, terminal output, Windows console setup, CJK width
 internal/update                    version checking, GitHub releases API, in-place self-update

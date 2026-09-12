@@ -99,6 +99,35 @@ var enCatalog = map[Key]string{
 	KeyCmdUpdateApplyFailed:     "failed to apply update: %v",
 	KeyCmdUpdateNoAsset:         "no prebuilt binary available for %s/%s in release %s",
 
+	// Commands - handoff
+	KeyCmdHandoffMissingTarget:  "missing target profile name — example: cca handoff work",
+	KeyCmdHandoffSameProfile:    "source and target profile cannot be the same",
+	KeyCmdHandoffNoSessionFound: "no sessions found in profile '%s' for this project",
+	KeyCmdHandoffBanner:         "Handoff session %s (%s) from '%s' to '%s'…",
+	KeyCmdHandoffCopyFailed:     "failed to hand off session: %w",
+
+	// Commands - session
+	KeyCmdSessionUnknownSubcmd:     "unknown session command '%s' — try: ls, cp, mv, rm",
+	KeyCmdSessionMissingFromTo:     "--from and --to are both required — example: cca session cp --from work --to personal --all",
+	KeyCmdSessionSameProfile:       "--from and --to cannot be the same profile",
+	KeyCmdSessionRequireIdOrAll:    "must specify either --id <sessionId> or --all",
+	KeyCmdSessionNoSessionsFound:   "No sessions found in profile '%s' for this project",
+	KeyCmdSessionNoSessionsAllHint: "(use --all to view sessions across all projects)",
+	KeyCmdSessionCopySuccess:       "Copied session %s from '%s' to '%s'",
+	KeyCmdSessionCopyAllSuccess:    "Copied %d session(s) from '%s' to '%s'",
+	KeyCmdSessionMoveSuccess:       "Moved session %s from '%s' to '%s'",
+	KeyCmdSessionMoveAllSuccess:    "Moved %d session(s) from '%s' to '%s'",
+	KeyCmdSessionRmSuccess:         "Removed session %s from '%s'",
+	KeyCmdSessionRmAllSuccess:      "Removed %d session(s) from '%s'",
+	KeyCmdSessionRmConfirmSingle:   "About to remove session %s from profile '%s'. Confirm? [y/N] ",
+	KeyCmdSessionRmConfirmAll:      "About to remove %d session(s) for this project from profile '%s'. Confirm? [y/N] ",
+	KeyCmdSessionHeaderID:          "SESSION ID",
+	KeyCmdSessionHeaderProject:     "PROJECT",
+	KeyCmdSessionHeaderTitle:       "TITLE",
+	KeyCmdSessionHeaderMessages:    "MSGS",
+	KeyCmdSessionHeaderSize:        "SIZE",
+	KeyCmdSessionHeaderModified:    "MODIFIED",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — multiple Claude Code accounts on one machine
 
@@ -108,6 +137,8 @@ Commands:
   ls                    list profiles and which account each is logged into
   new <name>              create a new profile (--login, --yolo)
   use <name> [args…]      run Claude Code under a profile
+  handoff <to> [args…]     continue current session in another profile (--fork)
+  session <subcommand>     manage sessions: ls, cp, mv, rm (--from, --to, --all, --id)
   login <name>             log in a profile
   logout <name>            log out a profile
   info <name>               show details for a profile
@@ -127,6 +158,9 @@ Examples:
   cca new work --login       create profile 'work' and log in right away
   cca work                   run Claude Code under profile 'work'
   cca work --resume          any trailing args are passed straight to claude
+  cca handoff work           handoff active session to 'work' and continue
+  cca session ls             list recent sessions in current directory
+  cca session cp --from default --to work --all   copy all sessions
   cca ls                     see which profile is logged into which account
   cca sync --all             refresh shared files after installing a new plugin
   cca settings lang          change display language

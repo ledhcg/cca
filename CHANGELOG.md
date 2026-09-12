@@ -25,6 +25,18 @@ All notable changes to this project are documented in this file.
 - **Rune- and CJK-aware terminal formatting**: `ui.StringWidth` and `ui.PadRight`
   ensure visual alignment across Vietnamese accented text and full-width CJK (Chinese, Japanese)
   characters in tables and menus.
+- **Session transfer & handoff (`cca handoff` & `cca session`)**:
+  - `cca handoff <to-profile> [--from <profile>] [--id <sessionId>] [--fork] [--yolo]`:
+    Seamlessly hand off an active session from one account to another (e.g. when quota runs out)
+    and resume work immediately without losing conversation history.
+  - `cca session ls [--from <profile>] [--all]`:
+    Inspect recent sessions, titles, message counts, sizes, and modification dates.
+  - `cca session cp --from <profile> --to <profile> [--id <sessionId> | --all]`:
+    Copy sessions across profile environments.
+  - `cca session mv --from <profile> --to <profile> [--id <sessionId> | --all]`:
+    Move sessions between profiles, pruning them from the source profile.
+  - `cca session rm [--from <profile>] (--id <sessionId> | --all) [-y]`:
+    Remove session transcripts, subagents, rollback snapshots, and prompt history.
 
 ## [1.0.0] — 2026-09-08
 

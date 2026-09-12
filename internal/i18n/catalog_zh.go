@@ -99,6 +99,35 @@ var zhCatalog = map[Key]string{
 	KeyCmdUpdateApplyFailed:     "应用更新失败: %v",
 	KeyCmdUpdateNoAsset:         "发布版本 %[3]s 中没有适用于 %[1]s/%[2]s 的预编译二进制文件",
 
+	// Commands - handoff
+	KeyCmdHandoffMissingTarget:  "缺少目标配置文件名称 — 例如: cca handoff work",
+	KeyCmdHandoffSameProfile:    "源配置文件与目标配置文件不能相同",
+	KeyCmdHandoffNoSessionFound: "在配置文件 '%s' 中未找到此项目的会话",
+	KeyCmdHandoffBanner:         "正在将会话 %s (%s) 从 '%s' 交接至 '%s'…",
+	KeyCmdHandoffCopyFailed:     "交接会话失败: %w",
+
+	// Commands - session
+	KeyCmdSessionUnknownSubcmd:     "未知的会话命令 '%s' — 尝试: ls, cp, mv, rm",
+	KeyCmdSessionMissingFromTo:     "--from 和 --to 均为必填项 — 例如: cca session cp --from work --to personal --all",
+	KeyCmdSessionSameProfile:       "--from 和 --to 不能是同一个配置文件",
+	KeyCmdSessionRequireIdOrAll:    "必须指定 --id <sessionId> 或 --all",
+	KeyCmdSessionNoSessionsFound:   "在配置文件 '%s' 中未找到此项目的会话",
+	KeyCmdSessionNoSessionsAllHint: "(使用 --all 查看所有项目的会话)",
+	KeyCmdSessionCopySuccess:       "已将会话 %s 从 '%s' 复制到 '%s'",
+	KeyCmdSessionCopyAllSuccess:    "已将 %d 个会话从 '%s' 复制到 '%s'",
+	KeyCmdSessionMoveSuccess:       "已将会话 %s 从 '%s' 移动到 '%s'",
+	KeyCmdSessionMoveAllSuccess:    "已将 %d 个会话从 '%s' 移动到 '%s'",
+	KeyCmdSessionRmSuccess:         "已从 '%s' 中删除会话 %s",
+	KeyCmdSessionRmAllSuccess:      "已从 '%s' 中删除 %d 个会话",
+	KeyCmdSessionRmConfirmSingle:   "即将从配置文件 '%s' 中删除会话 %s。确认吗? [y/N] ",
+	KeyCmdSessionRmConfirmAll:      "即将从配置文件 '%s' 中删除此项目的 %d 个会话。确认吗? [y/N] ",
+	KeyCmdSessionHeaderID:          "会话ID",
+	KeyCmdSessionHeaderProject:     "项目",
+	KeyCmdSessionHeaderTitle:       "标题",
+	KeyCmdSessionHeaderMessages:    "消息数",
+	KeyCmdSessionHeaderSize:        "大小",
+	KeyCmdSessionHeaderModified:    "修改时间",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — 在同一台机器上管理多个 Claude Code 账号
 
@@ -108,6 +137,8 @@ var zhCatalog = map[Key]string{
   ls                    列出所有配置文件及其登录的账号
   new <名称>             创建新的配置文件 (--login, --yolo)
   use <名称> [参数…]     在指定配置文件下运行 Claude Code
+  handoff <目标> [参数…] 将当前会话交接给另一配置文件并继续 (--fork)
+  session <操作>         管理会话: ls, cp, mv, rm (--from, --to, --all, --id)
   login <名称>           登录指定配置文件
   logout <名称>          注销指定配置文件
   info <名称>            查看配置文件详细信息
@@ -122,6 +153,19 @@ var zhCatalog = map[Key]string{
   guide                  查看完整使用指南
   install                将 cca 添加到 PATH 并配置自动补全
   version                显示 cca 当前版本
+
+示例:
+  cca new work --login       创建 'work' 配置文件并立即登录
+  cca work                   在 'work' 配置文件下运行 Claude Code
+  cca work --resume          后续参数将直接透传给 claude
+  cca handoff work           将会话快速交接给 'work' 并继续工作
+  cca session ls             列出当前目录下的会话
+  cca session cp --from default --to work --all   复制全部会话
+  cca ls                     查看各个配置文件登录的账号
+  cca sync --all             安装新插件后刷新共享文件
+  cca settings lang          修改显示语言
+  cca work --yolo            --dangerously-skip-permissions 的别名
+  cca sh work                在预设好 CLAUDE_CONFIG_DIR 的子 Shell 中运行
 
 示例:
   cca new work --login       创建 'work' 配置文件并立即登录

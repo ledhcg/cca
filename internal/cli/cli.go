@@ -80,7 +80,7 @@ func requirePositional(args parsedArgs) (string, error) {
 func extractLang(argv []string) ([]string, string) {
 	var filtered []string
 	var lang string
-	isPassthrough := len(argv) > 0 && (argv[0] == "use" || argv[0] == "exec")
+	isPassthrough := len(argv) > 0 && (argv[0] == "use" || argv[0] == "exec" || argv[0] == "handoff")
 
 	for i := 0; i < len(argv); i++ {
 		arg := argv[i]
@@ -102,8 +102,8 @@ func extractLang(argv []string) ([]string, string) {
 }
 
 var subcommands = map[string]bool{
-	"ls": true, "new": true, "use": true, "login": true, "logout": true,
-	"info": true, "sh": true, "exec": true, "rm": true, "sync": true,
+	"ls": true, "new": true, "use": true, "handoff": true, "session": true,
+	"login": true, "logout": true, "info": true, "sh": true, "exec": true, "rm": true, "sync": true,
 	"doctor": true, "settings": true, "update": true, "config": true, "guide": true, "help": true, "install": true,
 	"version": true,
 }
@@ -195,6 +195,10 @@ func dispatch(a *app.App, argv []string) int {
 			return runCmd(func() error { return errors.New(i18n.T(i18n.KeyCliErrMissingProfileName)) })
 		}
 		return runCmd(func() error { return cmdUse(a, rest[0], rest[1:]) })
+	case "handoff":
+		return runCmd(func() error { return cmdHandoff(a, rest) })
+	case "session":
+		return runCmd(func() error { return cmdSession(a, rest) })
 	case "login":
 		return runCmd(func() error { return cmdLogin(a, parseArgs(rest, nil, nil)) })
 	case "logout":

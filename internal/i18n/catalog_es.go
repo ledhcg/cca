@@ -99,6 +99,35 @@ var esCatalog = map[Key]string{
 	KeyCmdUpdateApplyFailed:     "error al aplicar la actualización: %v",
 	KeyCmdUpdateNoAsset:         "no hay binario precompilado disponible para %[1]s/%[2]s en la versión %[3]s",
 
+	// Commands - handoff
+	KeyCmdHandoffMissingTarget:  "falta el nombre del perfil de destino — ejemplo: cca handoff work",
+	KeyCmdHandoffSameProfile:    "el perfil de origen y el de destino no pueden ser el mismo",
+	KeyCmdHandoffNoSessionFound: "no se encontraron sesiones en el perfil '%s' para este proyecto",
+	KeyCmdHandoffBanner:         "Transfiriendo sesión %s (%s) de '%s' a '%s'…",
+	KeyCmdHandoffCopyFailed:     "error al transferir la sesión: %w",
+
+	// Commands - session
+	KeyCmdSessionUnknownSubcmd:     "comando de sesión desconocido '%s' — pruebe: ls, cp, mv, rm",
+	KeyCmdSessionMissingFromTo:     "se requieren tanto --from como --to — ejemplo: cca session cp --from work --to personal --all",
+	KeyCmdSessionSameProfile:       "--from y --to no pueden ser el mismo perfil",
+	KeyCmdSessionRequireIdOrAll:    "debe especificar --id <sessionId> o --all",
+	KeyCmdSessionNoSessionsFound:   "No se encontraron sesiones en el perfil '%s' para este proyecto",
+	KeyCmdSessionNoSessionsAllHint: "(use --all para ver sesiones de todos los proyectos)",
+	KeyCmdSessionCopySuccess:       "Sesión %s copiada de '%s' a '%s'",
+	KeyCmdSessionCopyAllSuccess:    "%d sesión(es) copiada(s) de '%s' a '%s'",
+	KeyCmdSessionMoveSuccess:       "Sesión %s movida de '%s' a '%s'",
+	KeyCmdSessionMoveAllSuccess:    "%d sesión(es) movida(s) de '%s' a '%s'",
+	KeyCmdSessionRmSuccess:         "Sesión %s eliminada de '%s'",
+	KeyCmdSessionRmAllSuccess:      "%d sesión(es) eliminada(s) de '%s'",
+	KeyCmdSessionRmConfirmSingle:   "A punto de eliminar la sesión %s del perfil '%s'. ¿Confirmar? [y/N] ",
+	KeyCmdSessionRmConfirmAll:      "A punto de eliminar %d sesión(es) de este proyecto del perfil '%s'. ¿Confirmar? [y/N] ",
+	KeyCmdSessionHeaderID:          "ID SESIÓN",
+	KeyCmdSessionHeaderProject:     "PROYECTO",
+	KeyCmdSessionHeaderTitle:       "TÍTULO",
+	KeyCmdSessionHeaderMessages:    "MENSAJES",
+	KeyCmdSessionHeaderSize:        "TAMAÑO",
+	KeyCmdSessionHeaderModified:    "MODIFICADO",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — varias cuentas de Claude Code en una sola máquina
 
@@ -108,6 +137,8 @@ Comandos:
   ls                    listar perfiles y en qué cuenta ha iniciado sesión cada uno
   new <nombre>           crear un nuevo perfil (--login, --yolo)
   use <nombre> [args…]   ejecutar Claude Code bajo un perfil
+  handoff <dest> [args…] transferir sesión a otro perfil y continuar (--fork)
+  session <operación>    gestión de sesiones: ls, cp, mv, rm (--from, --to, --all, --id)
   login <nombre>         iniciar sesión en un perfil
   logout <nombre>        cerrar sesión en un perfil
   info <nombre>          mostrar detalles de un perfil
@@ -122,6 +153,19 @@ Comandos:
   guide                  guía completa de uso
   install                agregar cca a PATH y configurar autocompletado
   version                imprimir la versión de cca
+
+Ejemplos:
+  cca new work --login       crear el perfil 'work' e iniciar sesión de inmediato
+  cca work                   ejecutar Claude Code bajo el perfil 'work'
+  cca work --resume          los argumentos posteriores se pasan directamente a claude
+  cca handoff work           transferir sesión a 'work' y continuar trabajando
+  cca session ls             listar sesiones en el directorio actual
+  cca session cp --from default --to work --all   copiar todas las sesiones
+  cca ls                     ver qué perfil está conectado a qué cuenta
+  cca sync --all             actualizar archivos compartidos tras instalar un plugin
+  cca settings lang          cambiar el idioma de la interfaz
+  cca work --yolo            alias de --dangerously-skip-permissions
+  cca sh work                abrir una subshell con CLAUDE_CONFIG_DIR establecido
 
 Ejemplos:
   cca new work --login       crear el perfil 'work' e iniciar sesión de inmediato

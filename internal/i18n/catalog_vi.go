@@ -99,6 +99,35 @@ var viCatalog = map[Key]string{
 	KeyCmdUpdateApplyFailed:     "không thể áp dụng bản cập nhật: %v",
 	KeyCmdUpdateNoAsset:         "không có bản dựng sẵn cho %s/%s trong bản phát hành %s",
 
+	// Commands - handoff
+	KeyCmdHandoffMissingTarget:  "thiếu tên hồ sơ đích — ví dụ: cca handoff work",
+	KeyCmdHandoffSameProfile:    "hồ sơ nguồn và hồ sơ đích không được trùng nhau",
+	KeyCmdHandoffNoSessionFound: "không tìm thấy phiên làm việc nào trong hồ sơ '%s' cho dự án này",
+	KeyCmdHandoffBanner:         "Chuyển giao phiên %s (%s) từ '%s' sang '%s'…",
+	KeyCmdHandoffCopyFailed:     "chuyển giao phiên thất bại: %w",
+
+	// Commands - session
+	KeyCmdSessionUnknownSubcmd:     "lệnh session không hợp lệ '%s' — hãy thử: ls, cp, mv, rm",
+	KeyCmdSessionMissingFromTo:     "yêu cầu cả --from và --to — ví dụ: cca session cp --from work --to personal --all",
+	KeyCmdSessionSameProfile:       "--from và --to không được là cùng một hồ sơ",
+	KeyCmdSessionRequireIdOrAll:    "phải chỉ định --id <sessionId> hoặc --all",
+	KeyCmdSessionNoSessionsFound:   "Không tìm thấy phiên nào trong hồ sơ '%s' cho dự án này",
+	KeyCmdSessionNoSessionsAllHint: "(dùng --all để xem các phiên của tất cả dự án)",
+	KeyCmdSessionCopySuccess:       "Đã sao chép phiên %s từ '%s' sang '%s'",
+	KeyCmdSessionCopyAllSuccess:    "Đã sao chép %d phiên từ '%s' sang '%s'",
+	KeyCmdSessionMoveSuccess:       "Đã di chuyển phiên %s từ '%s' sang '%s'",
+	KeyCmdSessionMoveAllSuccess:    "Đã di chuyển %d phiên từ '%s' sang '%s'",
+	KeyCmdSessionRmSuccess:         "Đã xóa phiên %s khỏi '%s'",
+	KeyCmdSessionRmAllSuccess:      "Đã xóa %d phiên khỏi '%s'",
+	KeyCmdSessionRmConfirmSingle:   "Sắp xóa phiên %s khỏi hồ sơ '%s'. Xác nhận? [y/N] ",
+	KeyCmdSessionRmConfirmAll:      "Sắp xóa %d phiên của dự án này khỏi hồ sơ '%s'. Xác nhận? [y/N] ",
+	KeyCmdSessionHeaderID:          "MÃ PHIÊN",
+	KeyCmdSessionHeaderProject:     "DỰ ÁN",
+	KeyCmdSessionHeaderTitle:       "TIÊU ĐỀ",
+	KeyCmdSessionHeaderMessages:    "TIN NHẮN",
+	KeyCmdSessionHeaderSize:        "DUNG LƯỢNG",
+	KeyCmdSessionHeaderModified:    "CẬP NHẬT",
+
 	// Guide & Usage
 	KeyGuideUsage: `cca — quản lý nhiều tài khoản Claude Code trên một máy
 
@@ -108,6 +137,8 @@ Các lệnh:
   ls                    liệt kê các hồ sơ và trạng thái đăng nhập
   new <tên>              tạo một hồ sơ mới (--login, --yolo)
   use <tên> [tham số…]   chạy Claude Code dưới hồ sơ chỉ định
+  handoff <đích> [args…] chuyển phiên làm việc sang hồ sơ khác (--fork)
+  session <thao tác>     quản lý phiên: ls, cp, mv, rm (--from, --to, --all, --id)
   login <tên>            đăng nhập cho một hồ sơ
   logout <tên>           đăng xuất một hồ sơ
   info <tên>             xem chi tiết thông tin hồ sơ
@@ -127,6 +158,9 @@ Ví dụ:
   cca new work --login       tạo hồ sơ 'work' và đăng nhập ngay
   cca work                   chạy Claude Code với hồ sơ 'work'
   cca work --resume          truyền các tham số còn lại thẳng vào claude
+  cca handoff work           chuyển phiên hiện tại sang 'work' và làm tiếp
+  cca session ls             liệt kê các phiên trong thư mục hiện tại
+  cca session cp --from default --to work --all   sao chép toàn bộ phiên
   cca ls                     xem hồ sơ nào đang đăng nhập tài khoản nào
   cca sync --all             đồng bộ lại plugin/skill sau khi cài plugin mới
   cca settings lang          thay đổi ngôn ngữ hiển thị

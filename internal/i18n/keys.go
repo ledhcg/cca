@@ -102,6 +102,35 @@ const (
 	KeyCmdUpdateApplyFailed     Key = "cmd.update.apply_failed"
 	KeyCmdUpdateNoAsset         Key = "cmd.update.no_asset"
 
+	// Commands - handoff
+	KeyCmdHandoffMissingTarget  Key = "cmd.handoff.missing_target"
+	KeyCmdHandoffSameProfile    Key = "cmd.handoff.same_profile"
+	KeyCmdHandoffNoSessionFound Key = "cmd.handoff.no_session_found"
+	KeyCmdHandoffBanner         Key = "cmd.handoff.banner"
+	KeyCmdHandoffCopyFailed     Key = "cmd.handoff.copy_failed"
+
+	// Commands - session
+	KeyCmdSessionUnknownSubcmd     Key = "cmd.session.unknown_subcmd"
+	KeyCmdSessionMissingFromTo     Key = "cmd.session.missing_from_to"
+	KeyCmdSessionSameProfile       Key = "cmd.session.same_profile"
+	KeyCmdSessionRequireIdOrAll    Key = "cmd.session.require_id_or_all"
+	KeyCmdSessionNoSessionsFound   Key = "cmd.session.no_sessions_found"
+	KeyCmdSessionNoSessionsAllHint Key = "cmd.session.no_sessions_all_hint"
+	KeyCmdSessionCopySuccess       Key = "cmd.session.copy_success"
+	KeyCmdSessionCopyAllSuccess    Key = "cmd.session.copy_all_success"
+	KeyCmdSessionMoveSuccess       Key = "cmd.session.move_success"
+	KeyCmdSessionMoveAllSuccess    Key = "cmd.session.move_all_success"
+	KeyCmdSessionRmSuccess         Key = "cmd.session.rm_success"
+	KeyCmdSessionRmAllSuccess      Key = "cmd.session.rm_all_success"
+	KeyCmdSessionRmConfirmSingle   Key = "cmd.session.rm_confirm_single"
+	KeyCmdSessionRmConfirmAll      Key = "cmd.session.rm_confirm_all"
+	KeyCmdSessionHeaderID          Key = "cmd.session.header.id"
+	KeyCmdSessionHeaderProject     Key = "cmd.session.header.project"
+	KeyCmdSessionHeaderTitle       Key = "cmd.session.header.title"
+	KeyCmdSessionHeaderMessages    Key = "cmd.session.header.messages"
+	KeyCmdSessionHeaderSize        Key = "cmd.session.header.size"
+	KeyCmdSessionHeaderModified    Key = "cmd.session.header.modified"
+
 	// Guide & Usage
 	KeyGuideUsage Key = "guide.usage"
 	KeyGuideFull  Key = "guide.full"
