@@ -158,7 +158,7 @@ func CheckLatestWithTimeout(currentVersion string, timeout time.Duration) (*Rele
 	if err != nil {
 		return nil, false, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, false, fmt.Errorf("no releases found for %s", GitHubRepo)
@@ -285,7 +285,7 @@ func Apply(a *app.App, release *ReleaseInfo) error {
 		_ = tmpFile.Close()
 		return fmt.Errorf("failed to download update: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		_ = tmpFile.Close()

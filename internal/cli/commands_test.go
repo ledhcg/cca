@@ -130,7 +130,7 @@ func TestCmdUpdateCheckWithMock(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"tag_name":"v1.0.0","assets":[]}`)
+		_, _ = fmt.Fprintf(w, `{"tag_name":"v1.0.0","assets":[]}`)
 	}))
 	defer ts.Close()
 

@@ -3,6 +3,7 @@ package cli
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -109,7 +110,7 @@ func cmdLs(a *app.App, args parsedArgs) error {
 
 func cmdNew(a *app.App, args parsedArgs) error {
 	if len(args.positional) == 0 {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdNewMissingName))
+		return errors.New(i18n.T(i18n.KeyCmdNewMissingName))
 	}
 	name := args.positional[0]
 	if err := profileenv.Validate(name); err != nil {
@@ -121,7 +122,7 @@ func cmdNew(a *app.App, args parsedArgs) error {
 	}
 	d := profileenv.Dir(a, name)
 	if _, err := os.Stat(d); err == nil {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdNewAlreadyExists, name, d))
+		return errors.New(i18n.T(i18n.KeyCmdNewAlreadyExists, name, d))
 	}
 	if _, err := os.Stat(a.ConfigPath); err != nil {
 		if err := config.Save(a, cfg); err != nil {
@@ -268,7 +269,7 @@ func cmdExec(a *app.App, name string, rest []string) error {
 		return err
 	}
 	if len(rest) == 0 {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdExecMissingCmd))
+		return errors.New(i18n.T(i18n.KeyCmdExecMissingCmd))
 	}
 	return exitCodeErr{runInherited(rest[0], rest[1:], profileenv.EnvFor(a, name))}
 }
@@ -279,7 +280,7 @@ func cmdRm(a *app.App, args parsedArgs) error {
 		return err
 	}
 	if name == profileenv.DefaultName {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdRmCannotRmDefault))
+		return errors.New(i18n.T(i18n.KeyCmdRmCannotRmDefault))
 	}
 	d, err := profileenv.Require(a, name)
 	if err != nil {
@@ -328,7 +329,7 @@ func cmdSync(a *app.App, args parsedArgs) error {
 		name = args.positional[0]
 	}
 	if name == profileenv.DefaultName {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdSyncCannotSyncDefault))
+		return errors.New(i18n.T(i18n.KeyCmdSyncCannotSyncDefault))
 	}
 	cfg, err := config.Load(a)
 	if err != nil {
@@ -339,7 +340,7 @@ func cmdSync(a *app.App, args parsedArgs) error {
 		names = profileenv.List(a)
 	} else {
 		if name == "" {
-			return fmt.Errorf(i18n.T(i18n.KeyCmdSyncMissingName))
+			return errors.New(i18n.T(i18n.KeyCmdSyncMissingName))
 		}
 		if _, err := profileenv.Require(a, name); err != nil {
 			return err
@@ -347,7 +348,7 @@ func cmdSync(a *app.App, args parsedArgs) error {
 		names = []string{name}
 	}
 	if len(names) == 0 {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdSyncNoProfiles))
+		return errors.New(i18n.T(i18n.KeyCmdSyncNoProfiles))
 	}
 	strategy := args.values["--strategy"]
 	for _, n := range names {
@@ -558,7 +559,7 @@ func cmdSettings(a *app.App, args parsedArgs) error {
 			}
 			norm := i18n.Normalize(target)
 			if norm == "" {
-				return fmt.Errorf(i18n.T(i18n.KeyCmdSettingsLangErrInvalid, target, strings.Join(i18n.SupportedCodes(), ", ")))
+				return errors.New(i18n.T(i18n.KeyCmdSettingsLangErrInvalid, target, strings.Join(i18n.SupportedCodes(), ", ")))
 			}
 			cfg.Lang = norm
 			if err := config.Save(a, cfg); err != nil {
@@ -601,7 +602,7 @@ func cmdSettings(a *app.App, args parsedArgs) error {
 		var choice int
 		_, err := fmt.Sscanf(input, "%d", &choice)
 		if err != nil || choice < 1 || choice > len(langs)+1 {
-			return fmt.Errorf(i18n.T(i18n.KeyCmdSettingsInvalidChoice, len(langs)+1))
+			return errors.New(i18n.T(i18n.KeyCmdSettingsInvalidChoice, len(langs)+1))
 		}
 
 		if choice == len(langs)+1 {

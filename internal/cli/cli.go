@@ -80,10 +80,7 @@ func requirePositional(args parsedArgs) (string, error) {
 func extractLang(argv []string) ([]string, string) {
 	var filtered []string
 	var lang string
-	isPassthrough := false
-	if len(argv) > 0 && (argv[0] == "use" || argv[0] == "exec") {
-		isPassthrough = true
-	}
+	isPassthrough := len(argv) > 0 && (argv[0] == "use" || argv[0] == "exec")
 
 	for i := 0; i < len(argv); i++ {
 		arg := argv[i]
