@@ -35,7 +35,7 @@ func cmdSession(a *app.App, argv []string) error {
 	case "help", "--help", "-h":
 		return printSessionUsage()
 	default:
-		return fmt.Errorf(i18n.T(i18n.KeyCmdSessionUnknownSubcmd, sub))
+		return errors.New(i18n.T(i18n.KeyCmdSessionUnknownSubcmd, sub))
 	}
 }
 

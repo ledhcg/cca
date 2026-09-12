@@ -104,7 +104,7 @@ var jaCatalog = map[Key]string{
 	KeyCmdHandoffSameProfile:    "引き継ぎ元と引き継ぎ先に同一のプロファイルは指定できません",
 	KeyCmdHandoffNoSessionFound: "プロファイル '%s' にこのプロジェクトのセッションが見つかりません",
 	KeyCmdHandoffBanner:         "セッション %s (%s) を '%s' から '%s' へ引き継いでいます…",
-	KeyCmdHandoffCopyFailed:     "セッションの引き継ぎに失敗しました: %w",
+	KeyCmdHandoffCopyFailed:     "セッションの引き継ぎに失敗しました",
 
 	// Commands - session
 	KeyCmdSessionUnknownSubcmd:     "不明なセッションコマンド '%s' — 利用可能: ls, cp, mv, rm",

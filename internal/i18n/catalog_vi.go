@@ -104,7 +104,7 @@ var viCatalog = map[Key]string{
 	KeyCmdHandoffSameProfile:    "hồ sơ nguồn và hồ sơ đích không được trùng nhau",
 	KeyCmdHandoffNoSessionFound: "không tìm thấy phiên làm việc nào trong hồ sơ '%s' cho dự án này",
 	KeyCmdHandoffBanner:         "Chuyển giao phiên %s (%s) từ '%s' sang '%s'…",
-	KeyCmdHandoffCopyFailed:     "chuyển giao phiên thất bại: %w",
+	KeyCmdHandoffCopyFailed:     "chuyển giao phiên thất bại",
 
 	// Commands - session
 	KeyCmdSessionUnknownSubcmd:     "lệnh session không hợp lệ '%s' — hãy thử: ls, cp, mv, rm",

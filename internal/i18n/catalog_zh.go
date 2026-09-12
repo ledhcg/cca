@@ -104,7 +104,7 @@ var zhCatalog = map[Key]string{
 	KeyCmdHandoffSameProfile:    "源配置文件与目标配置文件不能相同",
 	KeyCmdHandoffNoSessionFound: "在配置文件 '%s' 中未找到此项目的会话",
 	KeyCmdHandoffBanner:         "正在将会话 %s (%s) 从 '%s' 交接至 '%s'…",
-	KeyCmdHandoffCopyFailed:     "交接会话失败: %w",
+	KeyCmdHandoffCopyFailed:     "交接会话失败",
 
 	// Commands - session
 	KeyCmdSessionUnknownSubcmd:     "未知的会话命令 '%s' — 尝试: ls, cp, mv, rm",

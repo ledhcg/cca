@@ -104,7 +104,7 @@ var enCatalog = map[Key]string{
 	KeyCmdHandoffSameProfile:    "source and target profile cannot be the same",
 	KeyCmdHandoffNoSessionFound: "no sessions found in profile '%s' for this project",
 	KeyCmdHandoffBanner:         "Handoff session %s (%s) from '%s' to '%s'…",
-	KeyCmdHandoffCopyFailed:     "failed to hand off session: %w",
+	KeyCmdHandoffCopyFailed:     "failed to hand off session",
 
 	// Commands - session
 	KeyCmdSessionUnknownSubcmd:     "unknown session command '%s' — try: ls, cp, mv, rm",

@@ -104,7 +104,7 @@ var esCatalog = map[Key]string{
 	KeyCmdHandoffSameProfile:    "el perfil de origen y el de destino no pueden ser el mismo",
 	KeyCmdHandoffNoSessionFound: "no se encontraron sesiones en el perfil '%s' para este proyecto",
 	KeyCmdHandoffBanner:         "Transfiriendo sesión %s (%s) de '%s' a '%s'…",
-	KeyCmdHandoffCopyFailed:     "error al transferir la sesión: %w",
+	KeyCmdHandoffCopyFailed:     "error al transferir la sesión",
 
 	// Commands - session
 	KeyCmdSessionUnknownSubcmd:     "comando de sesión desconocido '%s' — pruebe: ls, cp, mv, rm",

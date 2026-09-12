@@ -83,7 +83,7 @@ func cmdHandoff(a *app.App, argv []string) error {
 			return err
 		}
 		if latest == nil {
-			return fmt.Errorf(i18n.T(i18n.KeyCmdHandoffNoSessionFound, fromProfile))
+			return errors.New(i18n.T(i18n.KeyCmdHandoffNoSessionFound, fromProfile))
 		}
 		sid = latest.ID
 		sessionTitle = latest.Title
@@ -101,7 +101,7 @@ func cmdHandoff(a *app.App, argv []string) error {
 
 	// Copy session from source to target
 	if err := session.TransferSession(fromDir, toDir, cwd, sid, false); err != nil {
-		return fmt.Errorf(i18n.T(i18n.KeyCmdHandoffCopyFailed, err))
+		return fmt.Errorf("%s: %w", i18n.T(i18n.KeyCmdHandoffCopyFailed), err)
 	}
 
 	// Prepare claude invocation
