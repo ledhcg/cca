@@ -143,7 +143,15 @@ GOOS=darwin  GOARCH=arm64 go build -o cca-darwin-arm64 ./cmd/cca
 | `cca new yolo --yolo` | create a profile with `defaultMode: bypassPermissions` preset |
 | `cca work [args…]` | run Claude under profile `work`; args are passed straight to `claude` |
 | `cca default` | run the root account (`~/.claude`) |
+| `cca handoff <to> [args…]` | hand off active session to another profile and resume immediately (`--fork`) |
+| `cca session ls [--from] [--all]` | list sessions in current directory or across all projects |
+| `cca session cp --from A --to B [--id \| --all]` | copy sessions between profiles |
+| `cca session mv --from A --to B [--id \| --all]` | move sessions between profiles (cleans up from source) |
+| `cca session rm [--from] (--id \| --all) [-y]` | remove sessions and their prompt history |
 | `cca ls` | which profile is logged into which account |
+| `cca settings` | view settings dashboard |
+| `cca settings lang [code]` | select or set display language (en, vi, zh, ja, es, auto) |
+| `cca update [--check]` | check for updates and self-update to the latest release |
 | `cca sync --all` | refresh shared files after installing a new plugin |
 | `cca doctor` | broken links, orphaned credentials, drifted state |
 | `cca info <name>` | directory, credential, account, disk usage |
@@ -154,10 +162,89 @@ GOOS=darwin  GOARCH=arm64 go build -o cca-darwin-arm64 ./cmd/cca
 | `cca config --edit` | open `config.json` in `$EDITOR` |
 | `cca config --print` | print `config.json` to the terminal |
 | `cca install` | add cca to PATH + completion, update the installed binary in place |
-| `cca version` | print the cca version |
+| `cca version` | print the cca version and check for available updates |
 
 `--yolo` is an alias for `--dangerously-skip-permissions`, and only has an
 effect inside `cca` — running `claude` directly is untouched.
+
+## Session transfer & handoff
+
+Running low on tokens or hit rate limits in one account? Transfer your active
+conversation to another profile without losing any context.
+
+```sh
+# Hand off the active session to profile 'work' and resume immediately
+cca handoff work
+
+# Fork the session so the source profile retains its original copy
+cca handoff work --fork
+
+# Explicit source and session ID
+cca handoff work --from default --id 8cd05aad
+```
+
+Manage and inspect sessions across profiles with `cca session`:
+```sh
+# List recent sessions in current directory
+cca session ls
+
+# List sessions across all projects
+cca session ls --all
+
+# Copy all sessions from personal to work
+cca session cp --from default --to work --all
+
+# Move a specific session
+cca session mv --from work --to personal --id 8cd05aad
+
+# Delete a session
+cca session rm --id 8cd05aad -y
+```
+
+A complete session transfer copies the `.jsonl` transcript, subagent transcripts,
+tool output artifacts, file rollback history (for `/undo`), session environment,
+and matching user prompt history.
+
+## Multi-language (i18n)
+
+`cca` supports 5 languages out of the box with zero external dependencies:
+- **English** (`en`)
+- **Tiếng Việt** (`vi`)
+- **简体中文** (`zh`)
+- **日本語** (`ja`)
+- **Español** (`es`)
+- **System auto-detection** (`auto`, reads `LC_ALL`/`LANG`)
+
+```sh
+# Interactive language picker
+cca settings lang
+
+# Set directly
+cca settings lang vi
+
+# One-shot override for any command
+cca --lang vi ls
+cca --lang ja doctor
+```
+
+Includes rune- and CJK-aware width calculation (`ui.StringWidth`) so terminal
+tables and menus align across multibyte characters and double-width CJK ideographs.
+
+## Auto-update
+
+`cca` can check for updates and update itself in place directly from GitHub Releases:
+
+```sh
+# Check if an update is available without downloading
+cca update --check
+
+# Download and replace the binary in place
+cca update
+```
+
+Background checks run every 24 hours in a non-blocking background goroutine.
+When an update is detected, a notice is printed to `stderr` after your command completes.
+Disable background checks with `CCA_NO_UPDATE_CHECK=1` or `CI=1`.
 
 ## Shared files
 
@@ -168,7 +255,8 @@ effect inside `cca` — running `claude` directly is untouched.
   "sharedLinks": ["plugins", "skills", "agents", "statusline-command.sh"],
   "sharedCopies": ["settings.json"],
   "syncStrategy": "merge",
-  "profileLocalKeys": ["model", "effortLevel", "permissions"]
+  "profileLocalKeys": ["model", "effortLevel", "permissions"],
+  "lang": "en"
 }
 ```
 
