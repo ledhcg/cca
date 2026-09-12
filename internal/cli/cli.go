@@ -13,6 +13,8 @@ import (
 	"strings"
 
 	"github.com/ledhcg/cca/internal/app"
+	"github.com/ledhcg/cca/internal/config"
+	"github.com/ledhcg/cca/internal/i18n"
 	"github.com/ledhcg/cca/internal/profileenv"
 	"github.com/ledhcg/cca/internal/ui"
 )
@@ -74,10 +76,37 @@ func requirePositional(args parsedArgs) (string, error) {
 	return args.positional[0], nil
 }
 
+func extractLang(argv []string) ([]string, string) {
+	var filtered []string
+	var lang string
+	isPassthrough := false
+	if len(argv) > 0 && (argv[0] == "use" || argv[0] == "exec") {
+		isPassthrough = true
+	}
+
+	for i := 0; i < len(argv); i++ {
+		arg := argv[i]
+		if strings.HasPrefix(arg, "--lang=") {
+			if !isPassthrough || i == 0 {
+				lang = strings.TrimPrefix(arg, "--lang=")
+				continue
+			}
+		} else if arg == "--lang" && i+1 < len(argv) {
+			if !isPassthrough || i == 0 {
+				lang = argv[i+1]
+				i++
+				continue
+			}
+		}
+		filtered = append(filtered, arg)
+	}
+	return filtered, lang
+}
+
 var subcommands = map[string]bool{
 	"ls": true, "new": true, "use": true, "login": true, "logout": true,
 	"info": true, "sh": true, "exec": true, "rm": true, "sync": true,
-	"doctor": true, "config": true, "guide": true, "help": true, "install": true,
+	"doctor": true, "settings": true, "config": true, "guide": true, "help": true, "install": true,
 	"version": true,
 }
 
@@ -87,6 +116,12 @@ var subcommands = map[string]bool{
 func Run(a *app.App, argv []string) int {
 	ui.Init()
 	ui.SetupConsole()
+
+	var cliLang string
+	argv, cliLang = extractLang(argv)
+
+	cfg, _ := config.Load(a)
+	i18n.Init(i18n.Resolve(cliLang, cfg.Lang))
 
 	if len(argv) == 0 {
 		return runCmd(func() error { return cmdLs(a, parsedArgs{bools: map[string]bool{}}) })
@@ -99,16 +134,16 @@ func Run(a *app.App, argv []string) int {
 			argv = append([]string{"use"}, argv...)
 		} else {
 			known := profileenv.List(a)
-			msg := fmt.Sprintf("'%s' is neither a command nor an existing profile.", name)
+			msg := i18n.T(i18n.KeyCliErrNotCommandOrProf, name)
 			if len(known) > 0 {
-				msg += "\n  Existing profiles: " + strings.Join(known, ", ")
+				msg += "\n" + i18n.T(i18n.KeyCliErrExistingProfiles, strings.Join(known, ", "))
 			} else {
-				msg += "\n  No extra profiles yet (only 'default' = ~/.claude)."
+				msg += "\n" + i18n.T(i18n.KeyCliErrNoExtraProfiles)
 			}
 			if profileenv.Validate(name) == nil {
-				msg += fmt.Sprintf("\n  Create this profile:  cca new %s --login", name)
+				msg += "\n" + i18n.T(i18n.KeyCliErrCreateThisProfile, name)
 			}
-			msg += "\n  See commands:       cca --help   ·   Full guide: cca guide"
+			msg += "\n" + i18n.T(i18n.KeyCliErrSeeCommandsGuide)
 			return runCmd(func() error { return errors.New(msg) })
 		}
 	}
@@ -121,7 +156,7 @@ func Run(a *app.App, argv []string) int {
 		return runCmd(func() error { return cmdNew(a, parseArgs(rest, []string{"--login", "--yolo"}, nil)) })
 	case "use":
 		if len(rest) == 0 {
-			return runCmd(func() error { return errors.New("missing profile name — example: cca use work") })
+			return runCmd(func() error { return errors.New(i18n.T(i18n.KeyCliErrMissingProfileName)) })
 		}
 		return runCmd(func() error { return cmdUse(a, rest[0], rest[1:]) })
 	case "login":
@@ -149,6 +184,8 @@ func Run(a *app.App, argv []string) int {
 		return runCmd(func() error { return cmdSync(a, parseArgs(rest, []string{"--all"}, []string{"--strategy"})) })
 	case "doctor":
 		return runCmd(func() error { return cmdDoctor(a, parseArgs(rest, nil, nil)) })
+	case "settings":
+		return runCmd(func() error { return cmdSettings(a, parseArgs(rest, nil, nil)) })
 	case "config":
 		return runCmd(func() error { return cmdConfig(a, parseArgs(rest, []string{"--edit", "--print"}, nil)) })
 	case "guide":

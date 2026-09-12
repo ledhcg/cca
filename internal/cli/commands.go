@@ -14,6 +14,7 @@ import (
 	"github.com/ledhcg/cca/internal/app"
 	"github.com/ledhcg/cca/internal/config"
 	"github.com/ledhcg/cca/internal/credential"
+	"github.com/ledhcg/cca/internal/i18n"
 	"github.com/ledhcg/cca/internal/link"
 	"github.com/ledhcg/cca/internal/profileenv"
 	"github.com/ledhcg/cca/internal/shellrc"
@@ -24,27 +25,24 @@ import (
 func printTable(rows [][]string, head []string) {
 	widths := make([]int, len(head))
 	for i, h := range head {
-		widths[i] = len([]rune(h))
+		widths[i] = ui.StringWidth(h)
 	}
 	for _, r := range rows {
 		for i, c := range r {
-			if l := len([]rune(c)); l > widths[i] {
+			if l := ui.StringWidth(c); l > widths[i] {
 				widths[i] = l
 			}
 		}
 	}
-	pad := func(s string, w int) string {
-		return s + strings.Repeat(" ", w-len([]rune(s)))
-	}
 	var headCells []string
 	for i, h := range head {
-		headCells = append(headCells, pad(h, widths[i]))
+		headCells = append(headCells, ui.PadRight(h, widths[i]))
 	}
 	fmt.Println(ui.C.Dim + strings.TrimRight(strings.Join(headCells, "  "), " ") + ui.C.Off)
 	for _, r := range rows {
 		var cells []string
 		for i, c := range r {
-			cells = append(cells, pad(c, widths[i]))
+			cells = append(cells, ui.PadRight(c, widths[i]))
 		}
 		fmt.Println(strings.TrimRight(strings.Join(cells, "  "), " "))
 	}
@@ -79,7 +77,7 @@ func cmdLs(a *app.App, args parsedArgs) error {
 
 	var rows [][]string
 	for i, name := range targets {
-		label := "default"
+		label := i18n.T(i18n.KeyCommonDefault)
 		if name != "" {
 			label = name
 		}
@@ -87,24 +85,29 @@ func cmdLs(a *app.App, args parsedArgs) error {
 			label += " ←"
 		}
 		st := results[i]
-		status := "logged out"
+		status := i18n.T(i18n.KeyCmdLsStatusOut)
 		if st.LoggedIn {
-			status = "logged in"
+			status = i18n.T(i18n.KeyCmdLsStatusIn)
 		}
 		rows = append(rows, []string{
-			label, status, or(st.Email, "—"), or(or(st.SubscriptionType, st.AuthMethod), "none"),
+			label, status, or(st.Email, "—"), or(or(st.SubscriptionType, st.AuthMethod), i18n.T(i18n.KeyCommonNone)),
 		})
 	}
-	printTable(rows, []string{"PROFILE", "STATUS", "ACCOUNT", "PLAN"})
+	printTable(rows, []string{
+		i18n.T(i18n.KeyCmdLsHeaderProfile),
+		i18n.T(i18n.KeyCmdLsHeaderStatus),
+		i18n.T(i18n.KeyCmdLsHeaderAccount),
+		i18n.T(i18n.KeyCmdLsHeaderPlan),
+	})
 	if len(names) == 0 {
-		fmt.Printf("\n%sNo extra profiles yet. Create one: %scca new work --login\n", ui.C.Dim, ui.C.Off)
+		fmt.Printf("\n" + i18n.T(i18n.KeyCmdLsNoProfiles, ui.C.Dim, ui.C.Off) + "\n")
 	}
 	return nil
 }
 
 func cmdNew(a *app.App, args parsedArgs) error {
 	if len(args.positional) == 0 {
-		return fmt.Errorf("missing profile name — example: cca new work")
+		return fmt.Errorf(i18n.T(i18n.KeyCmdNewMissingName))
 	}
 	name := args.positional[0]
 	if err := profileenv.Validate(name); err != nil {
@@ -116,7 +119,7 @@ func cmdNew(a *app.App, args parsedArgs) error {
 	}
 	d := profileenv.Dir(a, name)
 	if _, err := os.Stat(d); err == nil {
-		return fmt.Errorf("profile '%s' already exists at %s", name, d)
+		return fmt.Errorf(i18n.T(i18n.KeyCmdNewAlreadyExists, name, d))
 	}
 	if _, err := os.Stat(a.ConfigPath); err != nil {
 		if err := config.Save(a, cfg); err != nil {
@@ -124,7 +127,7 @@ func cmdNew(a *app.App, args parsedArgs) error {
 		}
 	}
 	log := config.Seed(a, d, cfg, "")
-	ui.Ok("Created profile %s%s%s → %s", ui.C.Bold, name, ui.C.Off, d)
+	ui.Ok(i18n.T(i18n.KeyCmdNewCreated, ui.C.Bold, name, ui.C.Off, d))
 	for _, line := range log {
 		fmt.Printf("  %s%s%s\n", ui.C.Dim, line, ui.C.Off)
 	}
@@ -144,19 +147,19 @@ func cmdNew(a *app.App, args parsedArgs) error {
 		data["permissions"] = perms
 		out, _ := json.MarshalIndent(data, "", "  ")
 		_ = os.WriteFile(sp, append(out, '\n'), 0644)
-		fmt.Printf("  %s⚡ defaultMode = bypassPermissions%s %s(this profile only)%s\n", ui.C.Yellow, ui.C.Off, ui.C.Dim, ui.C.Off)
+		fmt.Println(i18n.T(i18n.KeyCmdNewYoloNote, ui.C.Yellow, ui.C.Off, ui.C.Dim, ui.C.Off))
 	}
 	if args.bools["--login"] {
 		fmt.Println()
 		doLogin(a, name)
 	} else {
-		fmt.Printf("\nLog in:  %scca login %s%s\n", ui.C.Cyan, name, ui.C.Off)
+		fmt.Printf("\n" + i18n.T(i18n.KeyCmdNewLoginHint, ui.C.Cyan, name, ui.C.Off) + "\n")
 	}
 	return nil
 }
 
 func doLogin(a *app.App, name string) {
-	fmt.Printf("%sOpening the browser to log in profile '%s'…%s\n", ui.C.Dim, name, ui.C.Off)
+	fmt.Printf("%s"+i18n.T(i18n.KeyCmdLoginOpeningBrowser, name)+"%s\n", ui.C.Dim, ui.C.Off)
 	cmd := exec.Command(claudeBin(a), "auth", "login")
 	cmd.Env = profileenv.EnvFor(a, name)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
@@ -165,7 +168,7 @@ func doLogin(a *app.App, name string) {
 	if st.LoggedIn {
 		ui.Ok("'%s' → %s (%s)", name, st.Email, or(st.SubscriptionType, st.AuthMethod))
 	} else {
-		ui.Warn("'%s' is still logged out", name)
+		ui.Warn(i18n.T(i18n.KeyCmdLoginStillOut, name))
 	}
 }
 
@@ -193,7 +196,7 @@ func cmdLogout(a *app.App, args parsedArgs) error {
 	cmd.Env = profileenv.EnvFor(a, name)
 	cmd.Stdin, cmd.Stdout, cmd.Stderr = os.Stdin, os.Stdout, os.Stderr
 	_ = cmd.Run()
-	ui.Ok("Logged out profile '%s'", name)
+	ui.Ok(i18n.T(i18n.KeyCmdLogoutSuccess, name))
 	return nil
 }
 
@@ -235,11 +238,11 @@ func cmdUse(a *app.App, name string, rest []string) error {
 		return err
 	}
 	if !authStatus(a, name).LoggedIn {
-		ui.Warn("Profile '%s' is not logged in — run: cca login %s", name, name)
+		ui.Warn(i18n.T(i18n.KeyCmdUseWarnNotLoggedIn, name, name))
 	}
 	rest, yolo := expandYolo(rest)
 	if yolo {
-		fmt.Printf("%s⚡ bypass permissions%s %s(--yolo → %s)%s\n", ui.C.Yellow, ui.C.Off, ui.C.Dim, bypassFlag, ui.C.Off)
+		fmt.Println(i18n.T(i18n.KeyCmdUseYoloNote, ui.C.Yellow, ui.C.Off, ui.C.Dim, bypassFlag, ui.C.Off))
 	}
 	return exitCodeErr{runInherited(claudeBin(a), rest, profileenv.EnvFor(a, name))}
 }
@@ -254,7 +257,7 @@ func cmdSh(a *app.App, args parsedArgs) error {
 	}
 	env := profileenv.EnvFor(a, name)
 	shell := shellrc.DefaultInteractiveShell()
-	fmt.Printf("%sSubshell with CLAUDE_CONFIG_DIR=%s — type exit to leave%s\n", ui.C.Dim, profileenv.EnvGet(env, "CLAUDE_CONFIG_DIR"), ui.C.Off)
+	fmt.Printf("%s"+i18n.T(i18n.KeyCmdShSubshellBanner, profileenv.EnvGet(env, "CLAUDE_CONFIG_DIR"))+"%s\n", ui.C.Dim, ui.C.Off)
 	return exitCodeErr{runInherited(shell[0], shell[1:], env)}
 }
 
@@ -263,7 +266,7 @@ func cmdExec(a *app.App, name string, rest []string) error {
 		return err
 	}
 	if len(rest) == 0 {
-		return fmt.Errorf("missing command to run — example: cca exec work -- claude auth status")
+		return fmt.Errorf(i18n.T(i18n.KeyCmdExecMissingCmd))
 	}
 	return exitCodeErr{runInherited(rest[0], rest[1:], profileenv.EnvFor(a, name))}
 }
@@ -274,7 +277,7 @@ func cmdRm(a *app.App, args parsedArgs) error {
 		return err
 	}
 	if name == profileenv.DefaultName {
-		return fmt.Errorf("cannot remove the default profile — it's just ~/.claude")
+		return fmt.Errorf(i18n.T(i18n.KeyCmdRmCannotRmDefault))
 	}
 	d, err := profileenv.Require(a, name)
 	if err != nil {
@@ -284,25 +287,25 @@ func cmdRm(a *app.App, args parsedArgs) error {
 	hasCred := backend.Exists(d, false)
 	st := authStatus(a, name)
 	if !args.bools["-y"] && !args.bools["--yes"] {
-		fmt.Printf("About to remove profile %s%s%s:\n", ui.C.Bold, name, ui.C.Off)
-		fmt.Printf("  directory  %s\n", d)
+		fmt.Println(i18n.T(i18n.KeyCmdRmConfirmHeading, ui.C.Bold, name, ui.C.Off))
+		fmt.Printf("  %-10s %s\n", i18n.T(i18n.KeyCmdRmDirectoryLabel), d)
 		credLine := backend.DisplayID(d, false)
 		if hasCred {
-			credLine += " (still holds a logged-in session)"
+			credLine += " " + i18n.T(i18n.KeyCmdRmHasSession)
 		} else {
-			credLine += " (none)"
+			credLine += " (" + i18n.T(i18n.KeyCommonNone) + ")"
 		}
-		fmt.Printf("  %s %s\n", strings.ToLower(backend.Label()), credLine)
+		fmt.Printf("  %-10s %s\n", strings.ToLower(backend.Label()), credLine)
 		if st.Email != "" {
-			fmt.Printf("  account %s\n", st.Email)
+			fmt.Printf("  %-10s %s\n", i18n.T(i18n.KeyCmdRmAccountLabel), st.Email)
 		}
-		fmt.Printf("  %sShared links are only unlinked — ~/.claude itself is untouched.%s\n", ui.C.Dim, ui.C.Off)
+		fmt.Printf("  %s%s%s\n", ui.C.Dim, i18n.T(i18n.KeyCmdRmSharedHint), ui.C.Off)
 		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Confirm? [y/N] ")
+		fmt.Print(i18n.T(i18n.KeyCmdRmConfirmPrompt))
 		answer, _ := reader.ReadString('\n')
 		answer = strings.ToLower(strings.TrimSpace(answer))
-		if answer != "y" && answer != "yes" {
-			fmt.Println("Cancelled")
+		if answer != "y" && answer != "yes" && answer != "c" && answer != "co" && answer != "có" {
+			fmt.Println(i18n.T(i18n.KeyCommonCancelled))
 			return exitCodeErr{0}
 		}
 	}
@@ -312,7 +315,7 @@ func cmdRm(a *app.App, args parsedArgs) error {
 	if err := link.RemoveProfileDir(d); err != nil {
 		return fmt.Errorf("could not remove %s: %w", d, err)
 	}
-	ui.Ok("Removed profile '%s'", name)
+	ui.Ok(i18n.T(i18n.KeyCmdRmRemoved, name))
 	return nil
 }
 
@@ -323,7 +326,7 @@ func cmdSync(a *app.App, args parsedArgs) error {
 		name = args.positional[0]
 	}
 	if name == profileenv.DefaultName {
-		return fmt.Errorf("cannot sync the default profile — it's just ~/.claude")
+		return fmt.Errorf(i18n.T(i18n.KeyCmdSyncCannotSyncDefault))
 	}
 	cfg, err := config.Load(a)
 	if err != nil {
@@ -334,7 +337,7 @@ func cmdSync(a *app.App, args parsedArgs) error {
 		names = profileenv.List(a)
 	} else {
 		if name == "" {
-			return fmt.Errorf("missing profile name — example: cca sync work   (or cca sync --all)")
+			return fmt.Errorf(i18n.T(i18n.KeyCmdSyncMissingName))
 		}
 		if _, err := profileenv.Require(a, name); err != nil {
 			return err
@@ -342,14 +345,14 @@ func cmdSync(a *app.App, args parsedArgs) error {
 		names = []string{name}
 	}
 	if len(names) == 0 {
-		return fmt.Errorf("no profiles to sync yet")
+		return fmt.Errorf(i18n.T(i18n.KeyCmdSyncNoProfiles))
 	}
 	strategy := args.values["--strategy"]
 	for _, n := range names {
 		log := config.Seed(a, profileenv.Dir(a, n), cfg, strategy)
 		suffix := ""
 		if len(log) == 0 {
-			suffix = fmt.Sprintf(" %s(already up to date)%s", ui.C.Dim, ui.C.Off)
+			suffix = fmt.Sprintf(" %s%s%s", ui.C.Dim, i18n.T(i18n.KeyCmdSyncUpToDate), ui.C.Off)
 		}
 		fmt.Printf("%s%s%s%s\n", ui.C.Bold, n, ui.C.Off, suffix)
 		for _, line := range log {
@@ -395,17 +398,17 @@ func cmdInfo(a *app.App, args parsedArgs) error {
 	}
 	fmt.Printf("%s%s%s\n", ui.C.Bold, label, ui.C.Off)
 	if def {
-		fmt.Printf("  Config dir         %s  %s(CLAUDE_CONFIG_DIR not set)%s\n", d, ui.C.Dim, ui.C.Off)
+		fmt.Printf("  %s %s  %s%s%s\n", ui.PadRight(i18n.T(i18n.KeyCmdInfoConfigDir), 20), d, ui.C.Dim, i18n.T(i18n.KeyCmdInfoConfigDirNotSet), ui.C.Off)
 	} else {
-		fmt.Printf("  CLAUDE_CONFIG_DIR  %s\n", cd)
+		fmt.Printf("  %s %s\n", ui.PadRight("CLAUDE_CONFIG_DIR", 20), cd)
 	}
-	haveStr := "none"
+	haveStr := i18n.T(i18n.KeyCommonNone)
 	if backend.Exists(d, def) {
-		haveStr = "present"
+		haveStr = i18n.T(i18n.KeyCommonPresent)
 	}
-	fmt.Printf("  %-18s %s  %s\n", backend.Label(), backend.DisplayID(d, def), haveStr)
-	fmt.Printf("  Logged in          %s  (%s)\n", or(st.Email, "—"), or(or(st.SubscriptionType, st.AuthMethod), "—"))
-	fmt.Printf("  Status             %s · %d project(s) opened\n", filepath.Base(dotclaude), projects)
+	fmt.Printf("  %s %s  %s\n", ui.PadRight(backend.Label(), 20), backend.DisplayID(d, def), haveStr)
+	fmt.Printf("  %s %s  (%s)\n", ui.PadRight(i18n.T(i18n.KeyCmdInfoLoggedIn), 20), or(st.Email, "—"), or(or(st.SubscriptionType, st.AuthMethod), "—"))
+	fmt.Printf("  %s %s\n", ui.PadRight(i18n.T(i18n.KeyCmdInfoStatus), 20), i18n.T(i18n.KeyCmdInfoProjectsOpened, filepath.Base(dotclaude), projects))
 	if !def {
 		var size int64
 		_ = filepath.WalkDir(d, func(path string, entry os.DirEntry, err error) error {
@@ -420,7 +423,7 @@ func cmdInfo(a *app.App, args parsedArgs) error {
 			}
 			return nil
 		})
-		fmt.Printf("  Private size       %.0f KB\n", float64(size)/1024)
+		fmt.Printf("  %s %.0f KB\n", ui.PadRight(i18n.T(i18n.KeyCmdInfoPrivateSize), 20), float64(size)/1024)
 		entries, _ := os.ReadDir(d)
 		var links []string
 		for _, e := range entries {
@@ -431,7 +434,7 @@ func cmdInfo(a *app.App, args parsedArgs) error {
 		}
 		if len(links) > 0 {
 			sort.Strings(links)
-			fmt.Printf("  Shared             %s\n", strings.Join(links, ", "))
+			fmt.Printf("  %s %s\n", ui.PadRight(i18n.T(i18n.KeyCmdInfoShared), 20), strings.Join(links, ", "))
 		}
 	}
 	return nil
@@ -444,7 +447,7 @@ func cmdDoctor(a *app.App, args parsedArgs) error {
 	}
 	names := profileenv.List(a)
 	problems := 0
-	fmt.Printf("%sProfiles%s\n", ui.C.Bold, ui.C.Off)
+	fmt.Printf("%s%s%s\n", ui.C.Bold, i18n.T(i18n.KeyCmdDoctorProfilesHeading), ui.C.Off)
 	backend := credential.GetBackend()
 	knownIDs := map[string]bool{}
 	for _, n := range names {
@@ -474,23 +477,23 @@ func cmdDoctor(a *app.App, args parsedArgs) error {
 		hasCred := backend.Exists(d, def)
 		var bits []string
 		if len(broken) > 0 {
-			bits = append(bits, fmt.Sprintf("%sbroken link(s): %s%s", ui.C.Red, strings.Join(broken, ", "), ui.C.Off))
+			bits = append(bits, fmt.Sprintf("%s%s%s", ui.C.Red, i18n.T(i18n.KeyCmdDoctorBrokenLinks, strings.Join(broken, ", ")), ui.C.Off))
 			problems++
 		}
 		if len(missing) > 0 {
-			bits = append(bits, fmt.Sprintf("%smissing link(s): %s (run cca sync --all)%s", ui.C.Yellow, strings.Join(missing, ", "), ui.C.Off))
+			bits = append(bits, fmt.Sprintf("%s%s%s", ui.C.Yellow, i18n.T(i18n.KeyCmdDoctorMissingLinks, strings.Join(missing, ", ")), ui.C.Off))
 			problems++
 		}
 		if st.LoggedIn && !hasCred {
-			bits = append(bits, fmt.Sprintf("%slogged in but no %s found: %s%s", ui.C.Yellow, strings.ToLower(backend.Label()), credID, ui.C.Off))
+			bits = append(bits, fmt.Sprintf("%s%s%s", ui.C.Yellow, i18n.T(i18n.KeyCmdDoctorLoggedInNoCred, strings.ToLower(backend.Label()), credID), ui.C.Off))
 			problems++
 		}
 		if !st.LoggedIn && hasCred {
-			bits = append(bits, fmt.Sprintf("%shas a %s but couldn't log in%s", ui.C.Yellow, strings.ToLower(backend.Label()), ui.C.Off))
+			bits = append(bits, fmt.Sprintf("%s%s%s", ui.C.Yellow, i18n.T(i18n.KeyCmdDoctorHasCredNoLogin, strings.ToLower(backend.Label())), ui.C.Off))
 			problems++
 		}
 		if len(bits) == 0 {
-			fmt.Printf("  %s: %sok%s\n", n, ui.C.Green, ui.C.Off)
+			fmt.Printf("  %s: %s%s%s\n", n, ui.C.Green, i18n.T(i18n.KeyCommonOk), ui.C.Off)
 		} else {
 			fmt.Printf("  %s: %s\n", n, strings.Join(bits, "; "))
 		}
@@ -498,10 +501,10 @@ func cmdDoctor(a *app.App, args parsedArgs) error {
 
 	orphans := backend.Orphans(knownIDs)
 	if len(orphans) > 0 {
-		fmt.Printf("\n%s%s not owned by any profile%s\n", ui.C.Bold, backend.Label(), ui.C.Off)
+		fmt.Printf("\n%s"+i18n.T(i18n.KeyCmdDoctorOrphansHeading, backend.Label())+"%s\n", ui.C.Bold, ui.C.Off)
 		sort.Strings(orphans)
 		for _, s := range orphans {
-			fmt.Printf("  %s%s%s  %s(profile removed by hand?)%s\n", ui.C.Yellow, s, ui.C.Off, ui.C.Dim, ui.C.Off)
+			fmt.Printf("  %s%s%s  %s%s%s\n", ui.C.Yellow, s, ui.C.Off, ui.C.Dim, i18n.T(i18n.KeyCmdDoctorOrphanHint), ui.C.Off)
 		}
 	}
 
@@ -509,6 +512,117 @@ func cmdDoctor(a *app.App, args parsedArgs) error {
 		return exitCodeErr{1}
 	}
 	return nil
+}
+
+func cmdSettings(a *app.App, args parsedArgs) error {
+	cfg, err := config.Load(a)
+	if err != nil {
+		return err
+	}
+
+	if len(args.positional) == 0 {
+		// Dashboard overview
+		fmt.Printf("%s%s%s\n\n", ui.C.Bold, i18n.T(i18n.KeyCmdSettingsTitle), ui.C.Off)
+
+		sourceStr := i18n.T(i18n.KeyCmdSettingsSourceDefault)
+		if cfg.Lang != "" {
+			sourceStr = i18n.T(i18n.KeyCmdSettingsSourceConfig)
+		} else if os.Getenv("CCA_LANG") != "" {
+			sourceStr = i18n.T(i18n.KeyCmdSettingsSourceEnv)
+		}
+
+		curLangName := i18n.Name(i18n.Current())
+		fmt.Printf("  %-25s %s  %s(%s)%s\n", i18n.T(i18n.KeyCmdSettingsLangLabel)+":", curLangName, ui.C.Dim, sourceStr, ui.C.Off)
+		fmt.Printf("  %-25s %s\n\n", i18n.T(i18n.KeyCmdSettingsSyncLabel)+":", cfg.SyncStrategy)
+
+		fmt.Printf("%s%s%s\n", ui.C.Dim, i18n.T(i18n.KeyCmdSettingsOptionsHeading), ui.C.Off)
+		fmt.Printf("  %s\n", i18n.T(i18n.KeyCmdSettingsOptLangMenu))
+		fmt.Printf("  %s\n", i18n.T(i18n.KeyCmdSettingsOptLangCode))
+		return nil
+	}
+
+	sub := args.positional[0]
+	if sub == "lang" || sub == "language" {
+		if len(args.positional) > 1 {
+			target := args.positional[1]
+			if target == "auto" || target == "system" {
+				cfg.Lang = ""
+				if err := config.Save(a, cfg); err != nil {
+					return err
+				}
+				i18n.Init(i18n.Resolve("", ""))
+				ui.Ok(i18n.T(i18n.KeyCmdSettingsLangAutoSet, i18n.Name(i18n.Current())))
+				return nil
+			}
+			norm := i18n.Normalize(target)
+			if norm == "" {
+				return fmt.Errorf(i18n.T(i18n.KeyCmdSettingsLangErrInvalid, target, strings.Join(i18n.SupportedCodes(), ", ")))
+			}
+			cfg.Lang = norm
+			if err := config.Save(a, cfg); err != nil {
+				return err
+			}
+			i18n.Init(norm)
+			ui.Ok(i18n.T(i18n.KeyCmdSettingsLangUpdated, i18n.Name(norm)))
+			return nil
+		}
+
+		// Interactive menu
+		langs := i18n.SupportedLanguages()
+		fmt.Printf("\n%s%s%s\n\n", ui.C.Bold, i18n.T(i18n.KeyCmdSettingsPromptTitle), ui.C.Off)
+
+		cur := i18n.Current()
+		for i, l := range langs {
+			active := ""
+			if l.Code == cur && cfg.Lang != "" {
+				active = fmt.Sprintf("  %s✓ [%s]%s", ui.C.Green, i18n.T(i18n.KeyCommonActive), ui.C.Off)
+			}
+			label := fmt.Sprintf("[%d] %-18s (%s)", i+1, l.NativeName, l.Code)
+			fmt.Printf("  %s%s\n", label, active)
+		}
+		autoActive := ""
+		if cfg.Lang == "" {
+			autoActive = fmt.Sprintf("  %s✓ [%s]%s", ui.C.Green, i18n.T(i18n.KeyCommonActive), ui.C.Off)
+		}
+		fmt.Printf("  [%d] %-18s (auto: %s)%s\n\n", len(langs)+1, "Auto (System)", cur, autoActive)
+
+		fmt.Print("  " + i18n.T(i18n.KeyCmdSettingsPromptChoice, len(langs)+1))
+		reader := bufio.NewReader(os.Stdin)
+		input, _ := reader.ReadString('\n')
+		input = strings.TrimSpace(input)
+
+		if input == "" || input == "q" || input == "Q" {
+			fmt.Println("  " + i18n.T(i18n.KeyCommonCancelled))
+			return nil
+		}
+
+		var choice int
+		_, err := fmt.Sscanf(input, "%d", &choice)
+		if err != nil || choice < 1 || choice > len(langs)+1 {
+			return fmt.Errorf(i18n.T(i18n.KeyCmdSettingsInvalidChoice, len(langs)+1))
+		}
+
+		if choice == len(langs)+1 {
+			cfg.Lang = ""
+			if err := config.Save(a, cfg); err != nil {
+				return err
+			}
+			i18n.Init(i18n.Resolve("", ""))
+			ui.Ok(i18n.T(i18n.KeyCmdSettingsLangAutoSet, i18n.Name(i18n.Current())))
+			return nil
+		}
+
+		chosen := langs[choice-1].Code
+		cfg.Lang = chosen
+		if err := config.Save(a, cfg); err != nil {
+			return err
+		}
+		i18n.Init(chosen)
+		ui.Ok(i18n.T(i18n.KeyCmdSettingsLangUpdated, i18n.Name(chosen)))
+		return nil
+	}
+
+	return fmt.Errorf("unknown settings option '%s' — try: cca settings lang", sub)
 }
 
 func cmdConfig(a *app.App, args parsedArgs) error {

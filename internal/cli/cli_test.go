@@ -97,3 +97,61 @@ func TestIsDir(t *testing.T) {
 		t.Error("isDir on a nonexistent path = true, want false")
 	}
 }
+
+func TestExtractLang(t *testing.T) {
+	cases := []struct {
+		name     string
+		in       []string
+		wantArgv []string
+		wantLang string
+	}{
+		{
+			name:     "flag before command",
+			in:       []string{"--lang", "vi", "ls"},
+			wantArgv: []string{"ls"},
+			wantLang: "vi",
+		},
+		{
+			name:     "flag with equals before command",
+			in:       []string{"--lang=ja", "doctor"},
+			wantArgv: []string{"doctor"},
+			wantLang: "ja",
+		},
+		{
+			name:     "flag after command",
+			in:       []string{"ls", "--lang", "es"},
+			wantArgv: []string{"ls"},
+			wantLang: "es",
+		},
+		{
+			name:     "passthrough use command preserves trailing flag",
+			in:       []string{"use", "work", "--lang", "fr"},
+			wantArgv: []string{"use", "work", "--lang", "fr"},
+			wantLang: "",
+		},
+		{
+			name:     "settings lang positional is untouched",
+			in:       []string{"settings", "lang", "vi"},
+			wantArgv: []string{"settings", "lang", "vi"},
+			wantLang: "",
+		},
+		{
+			name:     "no lang flag",
+			in:       []string{"ls", "--names"},
+			wantArgv: []string{"ls", "--names"},
+			wantLang: "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			gotArgv, gotLang := extractLang(tc.in)
+			if !reflect.DeepEqual(gotArgv, tc.wantArgv) {
+				t.Errorf("gotArgv = %#v, want %#v", gotArgv, tc.wantArgv)
+			}
+			if gotLang != tc.wantLang {
+				t.Errorf("gotLang = %q, want %q", gotLang, tc.wantLang)
+			}
+		})
+	}
+}

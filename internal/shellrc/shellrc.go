@@ -15,7 +15,7 @@ import (
 const (
 	MarkStart = "# >>> cca >>>"
 	MarkEnd   = "# <<< cca <<<"
-	ccaCmds   = "ls new use sh exec login logout rm sync info doctor config guide help install version"
+	ccaCmds   = "ls new use sh exec login logout rm sync info doctor settings config guide help install version"
 )
 
 // Snippet returns the PATH + completion block to insert into an rc file for

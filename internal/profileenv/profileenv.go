@@ -18,7 +18,7 @@ const DefaultName = "default"
 
 var nameRe = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$`)
 
-var reserved = map[string]bool{DefaultName: true, "config.json": true, "config": true}
+var reserved = map[string]bool{DefaultName: true, "config.json": true, "config": true, "settings": true}
 
 // IsDefault reports whether name refers to the root ~/.claude profile.
 func IsDefault(name string) bool {

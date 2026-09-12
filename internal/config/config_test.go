@@ -1,6 +1,10 @@
 package config
 
-import "testing"
+import (
+	"encoding/json"
+	"strings"
+	"testing"
+)
 
 func TestMergeSettings(t *testing.T) {
 	main := map[string]any{
@@ -43,5 +47,27 @@ func TestMergeSettingsNoLocalOverrides(t *testing.T) {
 
 	if got["a"] != 1.0 || got["b"] != 2.0 {
 		t.Errorf("with no profileLocalKeys, everything should follow main; got %#v", got)
+	}
+}
+
+func TestConfigLangOmitEmpty(t *testing.T) {
+	cfg := Default
+	cfg.Lang = "vi"
+
+	data, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(data), `"lang":"vi"`) && !strings.Contains(string(data), `"lang": "vi"`) {
+		t.Errorf("expected json to contain lang field, got %s", string(data))
+	}
+
+	cfg.Lang = ""
+	dataEmpty, err := json.Marshal(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(dataEmpty), `"lang"`) {
+		t.Errorf("expected json not to contain lang field when empty, got %s", string(dataEmpty))
 	}
 }

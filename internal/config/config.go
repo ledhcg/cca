@@ -26,6 +26,8 @@ type Config struct {
 	SyncStrategy string `json:"syncStrategy"`
 	// With syncStrategy=merge: these keys belong to each profile, sync leaves them alone.
 	ProfileLocalKeys []string `json:"profileLocalKeys"`
+	// Lang specifies the preferred UI language ("en", "vi", "zh", "ja", "es" or "" for auto).
+	Lang string `json:"lang,omitempty"`
 }
 
 // Default is used until a config.json exists on disk.
